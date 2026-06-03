@@ -1,0 +1,1291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Author Command Center</title>
+  <meta name="theme-color" content="#0b0d10" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Author Command Center" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <style>
+    :root{
+      --bg:#0b0d10;
+      --panel:#151922;
+      --panel2:#1e2430;
+      --text:#f4f7fb;
+      --muted:#aeb8c7;
+      --line:#2a3242;
+      --accent:#c9a86a;
+      --good:#6bd79b;
+      --warn:#ffca66;
+      --bad:#ff7a7a;
+      --blue:#8fc7ff;
+      --shadow: 0 18px 50px rgba(0,0,0,.38);
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top left, rgba(201,168,106,.16), transparent 35%), var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    header{
+      position:sticky; top:0; z-index:10;
+      backdrop-filter: blur(14px);
+      background: rgba(11,13,16,.84);
+      border-bottom:1px solid var(--line);
+    }
+    .topbar{
+      max-width:1180px; margin:0 auto; padding:16px;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{
+      width:42px; height:42px; border-radius:14px;
+      background: linear-gradient(135deg, #c9a86a, #f1e3b8);
+      color:#121212; display:grid; place-items:center; font-weight:900;
+      box-shadow: var(--shadow);
+    }
+    h1{font-size:20px; line-height:1; margin:0}
+    .subtitle{font-size:12px; color:var(--muted); margin-top:5px}
+    .toolbar{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end}
+    button, .btn, input::file-selector-button{
+      border:1px solid var(--line);
+      background:var(--panel2);
+      color:var(--text);
+      padding:10px 12px;
+      border-radius:12px;
+      cursor:pointer;
+      font-weight:650;
+      transition:.15s transform, .15s background, .15s border;
+    }
+    button:hover,.btn:hover,input::file-selector-button:hover{background:#252c3a;border-color:#3a465b}
+    button:active,.btn:active{transform:scale(.98)}
+    button.primary{background:var(--accent); color:#141414; border-color:transparent}
+    button.ghost{background:transparent}
+    button.danger{background:rgba(255,122,122,.12); border-color:rgba(255,122,122,.3); color:#ffd4d4}
+    button.small{font-size:12px; padding:7px 9px; border-radius:10px}
+    main{max-width:1180px; margin:0 auto; padding:18px 16px 70px}
+    nav.tabs{display:flex; gap:8px; overflow:auto; padding:8px 0 18px}
+    .tab{
+      white-space:nowrap;
+      background:rgba(30,36,48,.65);
+      color:var(--muted);
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 14px;
+      cursor:pointer;
+      font-weight:750;
+    }
+    .tab.active{background:var(--accent); color:#151515; border-color:transparent}
+    .grid{display:grid; gap:14px}
+    .dashboard-grid{grid-template-columns:repeat(12,1fr)}
+    .card{
+      background:linear-gradient(180deg, rgba(21,25,34,.96), rgba(13,16,22,.96));
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      padding:16px;
+      box-shadow: var(--shadow);
+    }
+    .card h2,.card h3{margin:0 0 12px; letter-spacing:-.02em}
+    .card h2{font-size:20px}
+    .card h3{font-size:16px}
+    .span-3{grid-column:span 3}.span-4{grid-column:span 4}.span-5{grid-column:span 5}.span-6{grid-column:span 6}.span-7{grid-column:span 7}.span-8{grid-column:span 8}.span-12{grid-column:span 12}
+    .metric{
+      display:flex; flex-direction:column; gap:5px;
+      min-height:112px; justify-content:space-between
+    }
+    .metric .label{color:var(--muted); font-size:13px}
+    .metric .value{font-size:30px; font-weight:900; letter-spacing:-.04em}
+    .metric .note{font-size:12px; color:var(--muted)}
+    .good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)} .blue{color:var(--blue)}
+    .row{display:flex; align-items:center; gap:10px}
+    .between{justify-content:space-between}
+    .stack{display:flex; flex-direction:column; gap:10px}
+    .muted{color:var(--muted)}
+    .pill{
+      border:1px solid var(--line);
+      color:var(--muted);
+      border-radius:999px;
+      padding:5px 8px;
+      font-size:12px;
+      font-weight:700;
+      display:inline-flex;
+      gap:6px;
+      align-items:center;
+    }
+    .pill.gold{color:#ffe5a8; border-color:rgba(201,168,106,.55); background:rgba(201,168,106,.1)}
+    .pill.green{color:#baf6d1; border-color:rgba(107,215,155,.45); background:rgba(107,215,155,.08)}
+    .pill.red{color:#ffd0d0; border-color:rgba(255,122,122,.45); background:rgba(255,122,122,.08)}
+    .progress{
+      height:10px; background:#0d1118; border:1px solid var(--line); border-radius:999px; overflow:hidden
+    }
+    .progress > div{height:100%; background:linear-gradient(90deg, var(--accent), #f5d58d); width:0}
+    .views{display:none}.views.active{display:block}
+    table{width:100%; border-collapse:collapse; font-size:14px}
+    th,td{padding:10px 8px; border-bottom:1px solid var(--line); text-align:left; vertical-align:middle}
+    th{color:var(--muted); font-size:12px; text-transform:uppercase; letter-spacing:.06em}
+    tr:last-child td{border-bottom:none}
+    .table-wrap{overflow:auto}
+    .empty{
+      border:1px dashed var(--line);
+      border-radius:14px;
+      padding:22px;
+      color:var(--muted);
+      text-align:center;
+      background:rgba(255,255,255,.02)
+    }
+    .task-item{
+      display:flex; align-items:flex-start; gap:10px;
+      padding:12px;
+      border:1px solid var(--line);
+      border-radius:14px;
+      background:rgba(255,255,255,.03);
+    }
+    .task-item.done{opacity:.56}
+    .task-item input[type="checkbox"]{width:20px; height:20px; accent-color:var(--accent); margin-top:2px}
+    .task-title{font-weight:800}
+    .task-meta{font-size:12px; color:var(--muted); margin-top:4px}
+    .cards-list{display:grid; gap:12px}
+    .book-card{
+      display:grid; grid-template-columns: 1fr auto; gap:12px;
+      border:1px solid var(--line); border-radius:16px; padding:14px;
+      background:rgba(255,255,255,.03)
+    }
+    .book-title{font-size:17px; font-weight:900}
+    .book-sub{font-size:13px; color:var(--muted); margin-top:4px}
+    .actions{display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end; align-content:flex-start}
+    .modal-backdrop{
+      position:fixed; inset:0; z-index:100; display:none;
+      background:rgba(0,0,0,.72); align-items:center; justify-content:center; padding:16px;
+    }
+    .modal-backdrop.active{display:flex}
+    .modal{
+      width:min(720px, 100%);
+      max-height:90vh;
+      overflow:auto;
+      border:1px solid var(--line);
+      border-radius:24px;
+      background:#10141c;
+      box-shadow:0 30px 120px rgba(0,0,0,.7);
+    }
+    .modal-header{
+      position:sticky; top:0; background:#10141c; z-index:1;
+      padding:16px; border-bottom:1px solid var(--line);
+      display:flex; justify-content:space-between; align-items:center; gap:12px;
+    }
+    .modal-header h2{margin:0; font-size:18px}
+    form{padding:16px}
+    .form-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:12px}
+    label{font-size:12px; color:var(--muted); font-weight:800; display:block; margin-bottom:6px}
+    input, select, textarea{
+      width:100%;
+      background:#0b0f16;
+      color:var(--text);
+      border:1px solid var(--line);
+      border-radius:12px;
+      padding:11px 12px;
+      outline:none;
+      font:inherit;
+    }
+    textarea{min-height:94px; resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:rgba(201,168,106,.75); box-shadow:0 0 0 3px rgba(201,168,106,.12)}
+    .full{grid-column:1 / -1}
+    .form-actions{display:flex; justify-content:flex-end; gap:8px; margin-top:14px; padding-top:14px; border-top:1px solid var(--line)}
+    .receipt-preview{
+      max-width:64px; max-height:64px; border-radius:10px; border:1px solid var(--line); object-fit:cover;
+    }
+    .footer-note{
+      color:var(--muted);
+      font-size:12px;
+      margin-top:10px;
+      line-height:1.45;
+    }
+    .settings-row{display:grid; grid-template-columns: 1fr 180px; gap:12px; align-items:center; padding:10px 0; border-bottom:1px solid var(--line)}
+    .settings-row:last-child{border-bottom:none}
+    .toast{
+      position:fixed; left:50%; bottom:18px; transform:translateX(-50%);
+      background:#17202c; border:1px solid var(--line); color:var(--text);
+      padding:12px 14px; border-radius:14px; display:none; z-index:200; box-shadow:var(--shadow)
+    }
+    .toast.active{display:block}
+    @media(max-width:820px){
+      .dashboard-grid{grid-template-columns:repeat(6,1fr)}
+      .span-3,.span-4,.span-5,.span-6,.span-7,.span-8{grid-column:span 6}
+      .form-grid{grid-template-columns:1fr}
+      .topbar{align-items:flex-start; flex-direction:column}
+      .toolbar{justify-content:flex-start}
+      .book-card{grid-template-columns:1fr}
+      .actions{justify-content:flex-start}
+      table{font-size:13px}
+      th,td{padding:9px 7px}
+    }
+    @media(max-width:520px){
+      .dashboard-grid{grid-template-columns:1fr}
+      .span-3,.span-4,.span-5,.span-6,.span-7,.span-8,.span-12{grid-column:span 1}
+      main{padding-left:12px; padding-right:12px}
+      .metric .value{font-size:26px}
+      .card{padding:14px}
+      .tab{padding:9px 12px; font-size:13px}
+    }
+    @media print {
+      header, nav, button, .actions, .form-actions { display:none !important; }
+      body{background:white;color:black}
+      .card{box-shadow:none;border:1px solid #ccc;background:white;color:black}
+      .muted,.label,.note,th{color:#555}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo">AC</div>
+        <div>
+          <h1>Author Command Center</h1>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <button class="small primary" onclick="openModal('task')">+ Task</button>
+        <button class="small" onclick="openModal('expense')">+ Expense</button>
+        <button class="small" onclick="openModal('book')">+ Book</button>
+        <button class="small ghost" onclick="exportData()">Export JSON</button>
+        <button class="small primary" onclick="exportGoogleDriveZip(true)">Drive Backup</button>
+        <label class="btn small ghost" for="import-file">Import</label>
+        <input id="import-file" type="file" accept="application/json" style="display:none" onchange="importData(event)">
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <nav class="tabs" aria-label="App sections">
+      <button class="tab active" data-view="dashboard">Dashboard</button>
+      <button class="tab" data-view="week">This Week</button>
+      <button class="tab" data-view="books">Books</button>
+      <button class="tab" data-view="money">Money</button>
+      <button class="tab" data-view="receipts">Receipts</button>
+      <button class="tab" data-view="metrics">Metrics</button>
+      <button class="tab" data-view="backup">Backup</button>
+      <button class="tab" data-view="settings">Settings</button>
+    </nav>
+
+    <section id="dashboard" class="views active">
+      <div class="dashboard-grid grid">
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Books live</div>
+            <div id="dash-books-live" class="value">0</div>
+          </div>
+          <div class="note">Published titles only</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">This month gross</div>
+            <div id="dash-gross" class="value">$0</div>
+          </div>
+          <div class="note">Ebook + KU + print estimate</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Tax reserve</div>
+            <div id="dash-tax" class="value">$0</div>
+          </div>
+          <div class="note">Based on your setting</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Reader actions</div>
+            <div id="dash-actions" class="value">0</div>
+          </div>
+          <div class="note" id="dash-actions-note">0% of monthly goal</div>
+        </div>
+
+        <div class="card span-7">
+          <div class="row between">
+            <h2>This Week</h2>
+            <button class="small" onclick="openModal('task')">Add task</button>
+          </div>
+          <div id="dash-week-list" class="stack"></div>
+        </div>
+        <div class="card span-5">
+          <h2>Goal progress</h2>
+          <div class="stack">
+            <div class="row between">
+              <span class="muted">Monthly reader-action goal</span>
+              <strong id="dash-goal-label">0 / 0</strong>
+            </div>
+            <div class="progress"><div id="dash-progress"></div></div>
+            <div id="dash-goal-hint" class="footer-note">Add published books and monthly metrics to see progress.</div>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+          <h3>Quick alerts</h3>
+          <div id="dash-alerts" class="stack"></div>
+        </div>
+
+        <div class="card span-6">
+          <div class="row between">
+            <h2>Upcoming releases</h2>
+            <button class="small" onclick="openModal('book')">Add book</button>
+          </div>
+          <div id="dash-upcoming" class="cards-list"></div>
+        </div>
+        <div class="card span-6">
+          <h2>Expense snapshot</h2>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><td class="muted">YTD expenses</td><td id="dash-expenses" style="text-align:right">$0</td></tr>
+                <tr><td class="muted">YTD deductible estimate</td><td id="dash-deductible" style="text-align:right">$0</td></tr>
+                <tr><td class="muted">Missing receipts</td><td id="dash-missing-receipts" style="text-align:right">0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer-note">This is a planning tool, not tax advice. Keep original receipts and confirm categories with a tax professional.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="week" class="views">
+      <div class="card">
+        <div class="row between">
+          <div>
+            <h2>This Week’s Checklist</h2>
+            <div class="muted" id="week-range"></div>
+          </div>
+          <div class="row">
+            <button class="small" onclick="generateRecurringTasks()">Generate recurring</button>
+            <button class="small primary" onclick="openModal('task')">+ Task</button>
+          </div>
+        </div>
+        <div id="week-list" class="stack"></div>
+      </div>
+    </section>
+
+    <section id="books" class="views">
+      <div class="card">
+        <div class="row between">
+          <h2>Books</h2>
+          <button class="small primary" onclick="openModal('book')">+ Book</button>
+        </div>
+        <div id="books-list" class="cards-list"></div>
+      </div>
+    </section>
+
+    <section id="money" class="views">
+      <div class="dashboard-grid grid">
+        <div class="card metric span-4">
+          <div><div class="label">Current month gross</div><div id="money-gross" class="value">$0</div></div>
+          <div class="note">From monthly metrics</div>
+        </div>
+        <div class="card metric span-4">
+          <div><div class="label">Current month expenses</div><div id="money-expenses" class="value">$0</div></div>
+          <div class="note">Entered expenses for this month</div>
+        </div>
+        <div class="card metric span-4">
+          <div><div class="label">Estimated net after tax reserve</div><div id="money-net" class="value">$0</div></div>
+          <div class="note">Gross - expenses - tax reserve</div>
+        </div>
+        <div class="card span-12">
+          <div class="row between">
+            <h2>Expenses</h2>
+            <button class="small primary" onclick="openModal('expense')">+ Expense</button>
+          </div>
+          <div class="table-wrap"><table id="expenses-table"></table></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="receipts" class="views">
+      <div class="card">
+        <div class="row between">
+          <h2>Receipt Vault</h2>
+          <button class="small primary" onclick="openModal('expense')">+ Expense / Receipt</button>
+        </div>
+        <div class="footer-note">Attach screenshots, photos, or PDFs to expense records. This prototype stores them locally in your browser on this device. Use Export Backup regularly.</div>
+        <div id="receipt-list" class="cards-list" style="margin-top:14px"></div>
+      </div>
+    </section>
+
+    <section id="metrics" class="views">
+      <div class="card">
+        <div class="row between">
+          <h2>Monthly Book Metrics</h2>
+          <button class="small primary" onclick="openModal('metric')">+ Monthly Metric</button>
+        </div>
+        <div class="table-wrap"><table id="metrics-table"></table></div>
+      </div>
+    </section>
+
+
+    <section id="backup" class="views">
+      <div class="dashboard-grid grid">
+        <div class="card span-7">
+          <h2>Google Drive Backup</h2>
+          <p class="muted">Create one ZIP file that contains your full restore backup, CSV exports, a receipt manifest, and receipt files organized into folders. Your private data stays in your browser and backups — not in GitHub.</p>
+          <div class="stack">
+            <button class="primary" onclick="exportGoogleDriveZip(true)">Share / Save Google Drive Backup ZIP</button>
+            <button onclick="exportGoogleDriveZip(false)">Download Backup ZIP</button>
+            <button onclick="exportData()">Download Restore JSON Only</button>
+            <label class="btn" for="import-file-backup">Import Restore JSON</label>
+            <input id="import-file-backup" type="file" accept="application/json" style="display:none" onchange="importData(event)">
+          </div>
+          <div class="footer-note">
+            On iPhone, choose <strong>Share / Save</strong>. If the share sheet appears, pick Google Drive. If not, the ZIP downloads to Files/Downloads first, then you can move it into Google Drive.
+          </div>
+        </div>
+
+        <div class="card span-5">
+          <h2>What the ZIP includes</h2>
+          <div class="stack">
+            <span class="pill green">Full restore JSON</span>
+            <span class="pill">Books.csv</span>
+            <span class="pill">Tasks.csv</span>
+            <span class="pill">Expenses.csv</span>
+            <span class="pill">Monthly_Metrics.csv</span>
+            <span class="pill">Receipts_Manifest.csv</span>
+            <span class="pill gold">Receipt files by tax year/category</span>
+          </div>
+        </div>
+
+        <div class="card span-12">
+          <h2>Suggested Google Drive folders</h2>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Folder</th><th>Purpose</th></tr></thead>
+              <tbody>
+                <tr><td>Author Business / Backups</td><td>Upload the ZIP backup here weekly or monthly.</td></tr>
+                <tr><td>Author Business / Receipts / 2026</td><td>Optional manual receipt copies by tax year.</td></tr>
+                <tr><td>Author Business / Tax Prep / 2026</td><td>Keep yearly CSV exports and tax summaries here.</td></tr>
+                <tr><td>Author Business / Book Files</td><td>Manuscripts, covers, blurbs, and upload files.</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer-note">
+            Easiest habit: tap Drive Backup every Sunday after you update receipts/tasks. Keep the newest ZIP in Google Drive and occasionally delete older duplicates.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="settings" class="views">
+      <div class="card">
+        <h2>Settings</h2>
+        <div id="settings-list"></div>
+        <div class="form-actions">
+          <button class="primary" onclick="saveSettingsFromForm()">Save settings</button>
+          <button class="danger" onclick="resetDemoData()">Reset demo data</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div id="modal-backdrop" class="modal-backdrop" onclick="closeModalOnBackdrop(event)">
+    <div class="modal" role="dialog" aria-modal="true">
+      <div class="modal-header">
+        <h2 id="modal-title">Add</h2>
+        <button class="small ghost" onclick="closeModal()">✕</button>
+      </div>
+      <div id="modal-body"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+const STORAGE_KEY = "author-command-center-v1";
+
+const defaultState = {
+  "settings": {
+    "kuRate": 0.00482,
+    "taxReservePct": 30,
+    "defaultReaderActionGoal": 100,
+    "fullNovelEbookRoyalty": 3.43,
+    "novellaEbookRoyalty": 2.05,
+    "fullNovelPrintRoyalty": 3.0,
+    "novellaPrintRoyalty": 2.0,
+    "businessInternetPct": 40,
+    "businessCellPct": 40
+  },
+  "books": [],
+  "tasks": [],
+  "expenses": [],
+  "metrics": []
+};
+
+let state = loadState();
+let currentModal = null;
+let editingId = null;
+
+function todayISO(){
+  const d = new Date();
+  return d.toISOString().slice(0,10);
+}
+function nextWeekdayISO(targetDay){
+  const d = new Date();
+  const day = d.getDay();
+  let diff = targetDay - day;
+  if(diff < 0) diff += 7;
+  if(diff === 0) diff = 0;
+  d.setDate(d.getDate()+diff);
+  return d.toISOString().slice(0,10);
+}
+function loadState(){
+  const raw = localStorage.getItem(STORAGE_KEY);
+  if(!raw){
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
+    return JSON.parse(JSON.stringify(defaultState));
+  }
+  try{return JSON.parse(raw)}
+  catch(e){return structuredClone(defaultState)}
+}
+function saveState(){
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+}
+function uid(prefix){return prefix + "-" + Math.random().toString(36).slice(2,8).toUpperCase()}
+function money(n){return "$" + (Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0})}
+function money2(n){return "$" + (Number(n)||0).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2})}
+function num(n){return (Number(n)||0).toLocaleString(undefined,{maximumFractionDigits:0})}
+function dateFmt(iso){
+  if(!iso) return "";
+  const d = new Date(iso+"T00:00:00");
+  return d.toLocaleDateString(undefined,{month:"short", day:"numeric", year:"numeric"});
+}
+function startOfWeek(d=new Date()){
+  const x = new Date(d);
+  const day = x.getDay();
+  x.setDate(x.getDate()-day);
+  x.setHours(0,0,0,0);
+  return x;
+}
+function endOfWeek(d=new Date()){
+  const x = startOfWeek(d);
+  x.setDate(x.getDate()+6);
+  x.setHours(23,59,59,999);
+  return x;
+}
+function inCurrentWeek(iso){
+  if(!iso) return false;
+  const d = new Date(iso+"T12:00:00");
+  return d >= startOfWeek() && d <= endOfWeek();
+}
+function currentMonthKey(){
+  return new Date().toISOString().slice(0,7);
+}
+function showToast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg;
+  t.classList.add("active");
+  setTimeout(()=>t.classList.remove("active"),2200);
+}
+function bookById(id){return state.books.find(b=>b.id===id)}
+function titleById(id){const b=bookById(id); return b?b.title:""}
+function publishedBooks(){return state.books.filter(b=>b.status==="Published")}
+function bookActionGoal(b){return Number(b.goal || state.settings.defaultReaderActionGoal || 100)}
+
+document.querySelectorAll(".tab").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+    document.querySelectorAll(".views").forEach(v=>v.classList.remove("active"));
+    btn.classList.add("active");
+    document.getElementById(btn.dataset.view).classList.add("active");
+    render();
+  })
+});
+
+function calcMetric(m){
+  const b = bookById(m.bookId);
+  const kenp = Number(m.kenp || (b && b.kenp) || 340);
+  const kuPages = Number(m.kuPages || 0);
+  const kuReads = kenp ? kuPages/kenp : 0;
+  const ebookSales = Number(m.ebookSales||0);
+  const printSales = Number(m.printSales||0);
+  const ebookRoyalty = Number(m.ebookRoyalty||0);
+  const kuRoyalty = m.kuRoyalty !== "" && m.kuRoyalty !== undefined ? Number(m.kuRoyalty) : kuPages*Number(state.settings.kuRate||0);
+  const printRoyalty = Number(m.printRoyalty||0);
+  const actions = ebookSales + kuReads + printSales;
+  const gross = ebookRoyalty + kuRoyalty + printRoyalty;
+  return {kuReads, actions, gross, kuRoyalty};
+}
+function deductible(exp){return Number(exp.amount||0) * Number(exp.businessPct||0)/100}
+function thisMonthMetrics(){
+  const key = currentMonthKey();
+  return state.metrics.filter(m => (m.month||"").slice(0,7) === key);
+}
+function thisMonthExpenses(){
+  const key = currentMonthKey();
+  return state.expenses.filter(e => (e.date||"").slice(0,7) === key);
+}
+
+function render(){
+  renderDashboard();
+  renderWeek();
+  renderBooks();
+  renderMoney();
+  renderReceipts();
+  renderMetrics();
+  renderBackup();
+  renderSettings();
+}
+function renderDashboard(){
+  const booksLive = publishedBooks().length;
+  const metrics = thisMonthMetrics();
+  const gross = metrics.reduce((s,m)=>s+calcMetric(m).gross,0);
+  const actions = metrics.reduce((s,m)=>s+calcMetric(m).actions,0);
+  const totalGoal = publishedBooks().reduce((s,b)=>s+bookActionGoal(b),0);
+  const tax = gross * Number(state.settings.taxReservePct||0)/100;
+  const y = new Date().getFullYear();
+  const expensesYTD = state.expenses.filter(e=>Number(e.taxYear||new Date(e.date).getFullYear())===y).reduce((s,e)=>s+Number(e.amount||0),0);
+  const deductibleYTD = state.expenses.filter(e=>Number(e.taxYear||new Date(e.date).getFullYear())===y).reduce((s,e)=>s+deductible(e),0);
+  const missing = state.expenses.filter(e=>!e.receiptData && !e.receiptName).length;
+
+  document.getElementById("dash-books-live").textContent = booksLive;
+  document.getElementById("dash-gross").textContent = money(gross);
+  document.getElementById("dash-tax").textContent = money(tax);
+  document.getElementById("dash-actions").textContent = num(actions);
+  const pct = totalGoal ? Math.min(100, Math.round(actions/totalGoal*100)) : 0;
+  document.getElementById("dash-actions-note").textContent = `${pct}% of monthly goal`;
+  document.getElementById("dash-goal-label").textContent = `${num(actions)} / ${num(totalGoal)}`;
+  document.getElementById("dash-progress").style.width = pct + "%";
+  document.getElementById("dash-goal-hint").textContent = totalGoal ? `${num(totalGoal-actions)} more actions to hit this month’s benchmark.` : "Add published books and monthly metrics to see progress.";
+  document.getElementById("dash-expenses").textContent = money(expensesYTD);
+  document.getElementById("dash-deductible").textContent = money(deductibleYTD);
+  document.getElementById("dash-missing-receipts").textContent = missing;
+
+  const weekList = document.getElementById("dash-week-list");
+  const tasks = state.tasks.filter(t=>inCurrentWeek(t.dueDate)).sort((a,b)=>(a.dueDate||"").localeCompare(b.dueDate||"")).slice(0,5);
+  weekList.innerHTML = tasks.length ? tasks.map(taskHTML).join("") : `<div class="empty">No tasks due this week. Add one to start your checklist.</div>`;
+
+  const upcoming = document.getElementById("dash-upcoming");
+  const up = state.books.filter(b=>b.status!=="Published" && b.releaseDate).sort((a,b)=>a.releaseDate.localeCompare(b.releaseDate)).slice(0,3);
+  upcoming.innerHTML = up.length ? up.map(bookMiniHTML).join("") : `<div class="empty">No upcoming releases added yet.</div>`;
+
+  const alerts = [];
+  if(missing) alerts.push(`<div class="pill red">${missing} expense${missing===1?"":"s"} missing receipts</div>`);
+  if(totalGoal && actions < totalGoal) alerts.push(`<div class="pill gold">Reader-action gap: ${num(totalGoal-actions)}</div>`);
+  const overdue = state.tasks.filter(t=>!t.done && t.dueDate && new Date(t.dueDate+"T12:00:00") < new Date(startOfWeek())).length;
+  if(overdue) alerts.push(`<div class="pill red">${overdue} overdue task${overdue===1?"":"s"}</div>`);
+  if(!alerts.length) alerts.push(`<div class="pill green">No urgent alerts</div>`);
+  document.getElementById("dash-alerts").innerHTML = alerts.join("");
+}
+function taskHTML(t){
+  const book = titleById(t.bookId);
+  return `<div class="task-item ${t.done?'done':''}">
+    <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')">
+    <div style="flex:1">
+      <div class="row between">
+        <div class="task-title">${escapeHTML(t.name)}</div>
+        <div class="actions">
+          <button class="small" onclick="editItem('task','${t.id}')">Edit</button>
+          <button class="small danger" onclick="deleteItem('task','${t.id}')">Delete</button>
+        </div>
+      </div>
+      <div class="task-meta">${dateFmt(t.dueDate)} • ${escapeHTML(t.category||"Task")} ${book?`• ${escapeHTML(book)}`:""} ${t.repeat&&t.repeat!=="None"?`• repeats ${escapeHTML(t.repeat)}`:""}</div>
+      ${t.notes?`<div class="footer-note">${escapeHTML(t.notes)}</div>`:""}
+    </div>
+  </div>`;
+}
+function bookMiniHTML(b){
+  const days = Math.ceil((new Date(b.releaseDate+"T00:00:00") - new Date())/(1000*60*60*24));
+  return `<div class="book-card">
+    <div>
+      <div class="book-title">${escapeHTML(b.title)}</div>
+      <div class="book-sub">${escapeHTML(b.series)} • ${escapeHTML(b.type)} • ${escapeHTML(b.status)}</div>
+      <div class="footer-note">${dateFmt(b.releaseDate)} ${days>=0?`• ${days} days away`:"• date passed"}</div>
+    </div>
+    <div class="actions"><button class="small" onclick="editItem('book','${b.id}')">Edit</button></div>
+  </div>`;
+}
+function renderWeek(){
+  const s = startOfWeek(), e = endOfWeek();
+  document.getElementById("week-range").textContent = `${s.toLocaleDateString(undefined,{month:"short",day:"numeric"})} – ${e.toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}`;
+  const tasks = state.tasks.filter(t=>inCurrentWeek(t.dueDate)).sort((a,b)=>(a.dueDate||"").localeCompare(b.dueDate||"") || Number(a.done)-Number(b.done));
+  document.getElementById("week-list").innerHTML = tasks.length ? tasks.map(taskHTML).join("") : `<div class="empty">No tasks due this week.</div>`;
+}
+function renderBooks(){
+  const list = document.getElementById("books-list");
+  const books = [...state.books].sort((a,b)=>(a.releaseDate||"9999").localeCompare(b.releaseDate||"9999"));
+  list.innerHTML = books.length ? books.map(b=>{
+    const pct = b.wordGoal ? Math.min(100, Math.round(Number(b.currentWords||0)/Number(b.wordGoal)*100)) : 0;
+    return `<div class="book-card">
+      <div>
+        <div class="book-title">${escapeHTML(b.title)}</div>
+        <div class="book-sub">${escapeHTML(b.series)} • ${escapeHTML(b.type)} • ${escapeHTML(b.status)} • ${dateFmt(b.releaseDate)}</div>
+        <div class="row" style="margin-top:10px;flex-wrap:wrap">
+          <span class="pill gold">$${Number(b.price||0).toFixed(2)}</span>
+          <span class="pill">${Number(b.kenp||0)} KENP</span>
+          <span class="pill">Goal ${bookActionGoal(b)}/mo</span>
+        </div>
+        <div style="margin-top:10px">
+          <div class="row between"><span class="muted">Word progress</span><strong>${pct}%</strong></div>
+          <div class="progress"><div style="width:${pct}%"></div></div>
+        </div>
+        ${b.notes?`<div class="footer-note">${escapeHTML(b.notes)}</div>`:""}
+      </div>
+      <div class="actions">
+        <button class="small" onclick="openModal('metric', null, '${b.id}')">Add metric</button>
+        <button class="small" onclick="editItem('book','${b.id}')">Edit</button>
+        <button class="small danger" onclick="deleteItem('book','${b.id}')">Delete</button>
+      </div>
+    </div>`
+  }).join("") : `<div class="empty">No books added yet.</div>`;
+}
+function renderMoney(){
+  const gross = thisMonthMetrics().reduce((s,m)=>s+calcMetric(m).gross,0);
+  const expenses = thisMonthExpenses().reduce((s,e)=>s+Number(e.amount||0),0);
+  const tax = gross * Number(state.settings.taxReservePct||0)/100;
+  document.getElementById("money-gross").textContent = money(gross);
+  document.getElementById("money-expenses").textContent = money(expenses);
+  document.getElementById("money-net").textContent = money(gross-expenses-tax);
+
+  const rows = state.expenses.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(e=>`
+    <tr>
+      <td>${dateFmt(e.date)}</td>
+      <td>${escapeHTML(e.vendor)}</td>
+      <td>${escapeHTML(e.category)}</td>
+      <td>${money2(e.amount)}</td>
+      <td>${e.businessPct}%</td>
+      <td>${money2(deductible(e))}</td>
+      <td>${e.receiptData||e.receiptName?'<span class="pill green">Attached</span>':'<span class="pill red">Missing</span>'}</td>
+      <td><button class="small" onclick="editItem('expense','${e.id}')">Edit</button></td>
+    </tr>`).join("");
+  document.getElementById("expenses-table").innerHTML = `<thead><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Amount</th><th>Business %</th><th>Deductible</th><th>Receipt</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="8" class="muted">No expenses yet.</td></tr>'}</tbody>`;
+}
+function renderReceipts(){
+  const list = document.getElementById("receipt-list");
+  const rows = state.expenses.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(e=>{
+    const attached = e.receiptData || e.receiptName;
+    let preview = "";
+    if(e.receiptData && e.receiptType && e.receiptType.startsWith("image/")){
+      preview = `<img class="receipt-preview" src="${e.receiptData}" alt="Receipt preview">`;
+    } else if(e.receiptData) {
+      preview = `<div class="receipt-preview row" style="justify-content:center">PDF</div>`;
+    } else {
+      preview = `<div class="receipt-preview row" style="justify-content:center">—</div>`;
+    }
+    return `<div class="book-card">
+      <div class="row">
+        ${preview}
+        <div>
+          <div class="book-title">${escapeHTML(e.vendor)} • ${money2(e.amount)}</div>
+          <div class="book-sub">${dateFmt(e.date)} • ${escapeHTML(e.category)} • Tax year ${e.taxYear}</div>
+          <div class="footer-note">${attached ? escapeHTML(e.receiptName || "Receipt attached") : "No receipt attached yet."}</div>
+        </div>
+      </div>
+      <div class="actions">
+        ${e.receiptData?`<button class="small" onclick="downloadReceipt('${e.id}')">Open/Save</button>`:""}
+        <button class="small" onclick="editItem('expense','${e.id}')">Edit</button>
+      </div>
+    </div>`;
+  }).join("");
+  list.innerHTML = rows || `<div class="empty">No receipts or expenses yet.</div>`;
+}
+function renderMetrics(){
+  const rows = state.metrics.slice().sort((a,b)=>(b.month||"").localeCompare(a.month||"")).map(m=>{
+    const c = calcMetric(m);
+    const b = bookById(m.bookId);
+    const goal = b ? bookActionGoal(b) : state.settings.defaultReaderActionGoal;
+    const gap = c.actions-goal;
+    return `<tr>
+      <td>${escapeHTML(m.month||"")}</td>
+      <td>${escapeHTML(titleById(m.bookId))}</td>
+      <td>${num(m.ebookSales)}</td>
+      <td>${num(m.kuPages)}</td>
+      <td>${num(c.kuReads)}</td>
+      <td>${num(m.printSales)}</td>
+      <td>${num(c.actions)}</td>
+      <td class="${gap>=0?'good':'bad'}">${gap>=0?'+':''}${num(gap)}</td>
+      <td>${money2(c.gross)}</td>
+      <td><button class="small" onclick="editItem('metric','${m.id}')">Edit</button></td>
+    </tr>`;
+  }).join("");
+  document.getElementById("metrics-table").innerHTML = `<thead><tr><th>Month</th><th>Book</th><th>Ebook</th><th>KU Pages</th><th>KU Reads</th><th>Print</th><th>Actions</th><th>Gap</th><th>Gross</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="10" class="muted">No metrics yet. Add your monthly KDP numbers when books are live.</td></tr>'}</tbody>`;
+}
+function renderSettings(){
+  const s = state.settings;
+  const fields = [
+    ["kuRate","KU rate estimate", "number", "0.000001"],
+    ["taxReservePct","Tax reserve %", "number", "1"],
+    ["defaultReaderActionGoal","Default reader-action goal/month", "number", "1"],
+    ["fullNovelEbookRoyalty","Full novel ebook royalty estimate", "number", "0.01"],
+    ["novellaEbookRoyalty","Novella ebook royalty estimate", "number", "0.01"],
+    ["fullNovelPrintRoyalty","Full novel print royalty estimate", "number", "0.01"],
+    ["novellaPrintRoyalty","Novella print royalty estimate", "number", "0.01"],
+    ["businessInternetPct","Business internet %", "number", "1"],
+    ["businessCellPct","Business cell phone %", "number", "1"]
+  ];
+  document.getElementById("settings-list").innerHTML = fields.map(([key,label,type,step])=>`
+    <div class="settings-row">
+      <div><strong>${label}</strong><div class="footer-note">${key}</div></div>
+      <input id="set-${key}" type="${type}" step="${step}" value="${s[key]}">
+    </div>`).join("");
+}
+function saveSettingsFromForm(){
+  Object.keys(state.settings).forEach(k=>{
+    const el = document.getElementById("set-"+k);
+    if(el) state.settings[k] = Number(el.value);
+  });
+  saveState(); render(); showToast("Settings saved.");
+}
+
+function openModal(type, item=null, preselectBookId=""){
+  currentModal = type;
+  editingId = item ? item.id : null;
+  const title = document.getElementById("modal-title");
+  const body = document.getElementById("modal-body");
+  title.textContent = `${editingId?'Edit':'Add'} ${type[0].toUpperCase()+type.slice(1)}`;
+  if(type==="book") body.innerHTML = bookForm(item);
+  if(type==="task") body.innerHTML = taskForm(item);
+  if(type==="expense") body.innerHTML = expenseForm(item);
+  if(type==="metric") body.innerHTML = metricForm(item, preselectBookId);
+  document.getElementById("modal-backdrop").classList.add("active");
+}
+function closeModal(){
+  document.getElementById("modal-backdrop").classList.remove("active");
+  currentModal = null; editingId = null;
+}
+function closeModalOnBackdrop(e){
+  if(e.target.id === "modal-backdrop") closeModal();
+}
+function editItem(type,id){
+  const map = {book:"books", task:"tasks", expense:"expenses", metric:"metrics"};
+  const item = state[map[type]].find(x=>x.id===id);
+  openModal(type,item);
+}
+function deleteItem(type,id){
+  if(!confirm("Delete this item?")) return;
+  const map = {book:"books", task:"tasks", expense:"expenses", metric:"metrics"};
+  state[map[type]] = state[map[type]].filter(x=>x.id!==id);
+  saveState(); render(); showToast("Deleted.");
+}
+function bookOptions(selected=""){
+  return `<option value="">—</option>` + state.books.map(b=>`<option value="${b.id}" ${b.id===selected?'selected':''}>${escapeHTML(b.title)}</option>`).join("");
+}
+function bookForm(b={}){
+  const seriesOptions = ["Series 1","Series 2","Series 3","Standalone","Other"];
+  const visibleSeriesOptions = b.series && !seriesOptions.includes(b.series) ? [b.series, ...seriesOptions] : seriesOptions;
+  return `<form onsubmit="saveBook(event)">
+    <div class="form-grid">
+      <div class="full"><label>Title</label><input name="title" required value="${attr(b.title)}"></div>
+      <div><label>Series</label><select name="series">
+        ${visibleSeriesOptions.map(x=>`<option ${b.series===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Type</label><select name="type">
+        ${["Full Novel","Novella"].map(x=>`<option ${b.type===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Status</label><select name="status">
+        ${["Idea","Drafting","Editing","Preorder","Published"].map(x=>`<option ${b.status===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Release date</label><input type="date" name="releaseDate" value="${attr(b.releaseDate)}"></div>
+      <div><label>Price</label><input type="number" step="0.01" name="price" value="${b.price??4.99}"></div>
+      <div><label>KENP pages</label><input type="number" name="kenp" value="${b.kenp??340}"></div>
+      <div><label>Reader action goal / month</label><input type="number" name="goal" value="${b.goal??state.settings.defaultReaderActionGoal}"></div>
+      <div><label>Word count goal</label><input type="number" name="wordGoal" value="${b.wordGoal??70000}"></div>
+      <div><label>Current word count</label><input type="number" name="currentWords" value="${b.currentWords??0}"></div>
+      <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(b.notes||"")}</textarea></div>
+    </div>
+    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Book</button></div>
+  </form>`;
+}
+function taskForm(t={}){
+  return `<form onsubmit="saveTask(event)">
+    <div class="form-grid">
+      <div class="full"><label>Task name</label><input name="name" required value="${attr(t.name)}"></div>
+      <div><label>Category</label><select name="category">
+        ${["Writing","Marketing","Finance","Publishing","Ads","Reviews","Admin"].map(x=>`<option ${t.category===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Related book</label><select name="bookId">${bookOptions(t.bookId)}</select></div>
+      <div><label>Due date</label><input type="date" name="dueDate" value="${attr(t.dueDate||todayISO())}"></div>
+      <div><label>Repeat</label><select name="repeat">
+        ${["None","Daily","Weekly","Monthly","Quarterly","Release-Based"].map(x=>`<option ${t.repeat===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Repeat day</label><select name="repeatDay">
+        ${["","Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].map(x=>`<option ${t.repeatDay===x?'selected':''}>${x||"—"}</option>`).join("")}
+      </select></div>
+      <div><label>Priority</label><select name="priority">
+        ${["Low","Medium","High"].map(x=>`<option ${t.priority===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Done?</label><select name="done">
+        <option value="false" ${!t.done?'selected':''}>Not done</option>
+        <option value="true" ${t.done?'selected':''}>Done</option>
+      </select></div>
+      <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(t.notes||"")}</textarea></div>
+    </div>
+    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Task</button></div>
+  </form>`;
+}
+function expenseForm(e={}){
+  return `<form onsubmit="saveExpense(event)">
+    <div class="form-grid">
+      <div><label>Date</label><input type="date" name="date" value="${attr(e.date||todayISO())}"></div>
+      <div><label>Vendor</label><input name="vendor" required value="${attr(e.vendor)}"></div>
+      <div><label>Category</label><select name="category">
+        ${["Equipment","Software","Internet","Cell Phone","Ads","Covers","Editing","Formatting","Books / Research","Website","Newsletter","Travel","Office Supplies","Other"].map(x=>`<option ${e.category===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Amount</label><input type="number" step="0.01" name="amount" required value="${e.amount??""}"></div>
+      <div><label>Business use %</label><input type="number" step="1" name="businessPct" value="${e.businessPct??100}"></div>
+      <div><label>Payment method</label><select name="payment">
+        ${["Card","Debit","Credit","Cash","PayPal","Bank","Other"].map(x=>`<option ${e.payment===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Tax year</label><input type="number" name="taxYear" value="${e.taxYear??new Date().getFullYear()}"></div>
+      <div><label>Receipt file</label><input type="file" name="receiptFile" accept="image/*,application/pdf"></div>
+      <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(e.notes||"")}</textarea></div>
+      ${e.receiptName?`<div class="full footer-note">Current receipt: ${escapeHTML(e.receiptName)}</div>`:""}
+    </div>
+    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Expense</button></div>
+  </form>`;
+}
+function metricForm(m={}, preselectBookId=""){
+  const selected = m.bookId || preselectBookId || "";
+  return `<form onsubmit="saveMetric(event)">
+    <div class="form-grid">
+      <div><label>Month</label><input type="month" name="month" value="${attr((m.month||currentMonthKey()).slice(0,7))}"></div>
+      <div><label>Book</label><select name="bookId" required>${bookOptions(selected)}</select></div>
+      <div><label>Ebook sales</label><input type="number" name="ebookSales" value="${m.ebookSales??0}"></div>
+      <div><label>KU pages read</label><input type="number" name="kuPages" value="${m.kuPages??0}"></div>
+      <div><label>Print sales</label><input type="number" name="printSales" value="${m.printSales??0}"></div>
+      <div><label>Ebook royalty</label><input type="number" step="0.01" name="ebookRoyalty" value="${m.ebookRoyalty??0}"></div>
+      <div><label>KU royalty override</label><input type="number" step="0.01" name="kuRoyalty" placeholder="optional" value="${m.kuRoyalty??""}"></div>
+      <div><label>Print royalty</label><input type="number" step="0.01" name="printRoyalty" value="${m.printRoyalty??0}"></div>
+      <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(m.notes||"")}</textarea></div>
+    </div>
+    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Metric</button></div>
+  </form>`;
+}
+
+function saveBook(e){
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const obj = {
+    id: editingId || uid("B"),
+    title:f.get("title"), series:f.get("series"), type:f.get("type"), status:f.get("status"),
+    releaseDate:f.get("releaseDate"), price:Number(f.get("price")), kenp:Number(f.get("kenp")),
+    wordGoal:Number(f.get("wordGoal")), currentWords:Number(f.get("currentWords")),
+    goal:Number(f.get("goal")), notes:f.get("notes")
+  };
+  upsert("books", obj); closeModal(); saveState(); render(); showToast("Book saved.");
+}
+function saveTask(e){
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const obj = {
+    id: editingId || uid("T"),
+    name:f.get("name"), category:f.get("category"), bookId:f.get("bookId"),
+    dueDate:f.get("dueDate"), repeat:f.get("repeat"), repeatDay:f.get("repeatDay"),
+    priority:f.get("priority"), done:f.get("done")==="true", notes:f.get("notes")
+  };
+  upsert("tasks", obj); closeModal(); saveState(); render(); showToast("Task saved.");
+}
+async function saveExpense(e){
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const existing = editingId ? state.expenses.find(x=>x.id===editingId) : {};
+  let receiptName = existing?.receiptName || "";
+  let receiptData = existing?.receiptData || "";
+  let receiptType = existing?.receiptType || "";
+  const file = f.get("receiptFile");
+  if(file && file.size){
+    receiptName = file.name;
+    receiptType = file.type;
+    receiptData = await fileToDataURL(file);
+  }
+  const obj = {
+    id: editingId || uid("E"),
+    date:f.get("date"), vendor:f.get("vendor"), category:f.get("category"),
+    amount:Number(f.get("amount")), businessPct:Number(f.get("businessPct")),
+    payment:f.get("payment"), taxYear:Number(f.get("taxYear")),
+    receiptName, receiptData, receiptType, notes:f.get("notes")
+  };
+  upsert("expenses", obj); closeModal(); saveState(); render(); showToast("Expense saved.");
+}
+function saveMetric(e){
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const obj = {
+    id: editingId || uid("M"),
+    month:f.get("month"), bookId:f.get("bookId"),
+    ebookSales:Number(f.get("ebookSales")), kuPages:Number(f.get("kuPages")),
+    printSales:Number(f.get("printSales")), ebookRoyalty:Number(f.get("ebookRoyalty")),
+    kuRoyalty:f.get("kuRoyalty"), printRoyalty:Number(f.get("printRoyalty")),
+    notes:f.get("notes")
+  };
+  upsert("metrics", obj); closeModal(); saveState(); render(); showToast("Metric saved.");
+}
+function upsert(collection, obj){
+  const i = state[collection].findIndex(x=>x.id===obj.id);
+  if(i>=0) state[collection][i]=obj; else state[collection].push(obj);
+}
+function toggleTask(id){
+  const t = state.tasks.find(t=>t.id===id);
+  if(t){t.done=!t.done; saveState(); render();}
+}
+function generateRecurringTasks(){
+  const created = [];
+  const current = state.tasks.filter(t=>t.repeat && t.repeat!=="None");
+  const thisWeek = state.tasks.filter(t=>inCurrentWeek(t.dueDate));
+  current.forEach(t=>{
+    if(t.repeat === "Weekly"){
+      const already = thisWeek.some(x=>x.name===t.name && x.category===t.category && x.bookId===t.bookId && x.id!==t.id);
+      if(!already && !inCurrentWeek(t.dueDate)){
+        const dayIndex = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"].indexOf(t.repeatDay || "Sunday");
+        created.push({...t, id:uid("T"), dueDate: nextWeekdayISO(dayIndex<0?0:dayIndex), done:false});
+      }
+    }
+  });
+  state.tasks.push(...created);
+  saveState(); render(); showToast(created.length ? `Created ${created.length} recurring task(s).` : "No recurring tasks needed right now.");
+}
+function downloadReceipt(id){
+  const e = state.expenses.find(x=>x.id===id);
+  if(!e || !e.receiptData) return;
+  const a = document.createElement("a");
+  a.href = e.receiptData;
+  a.download = e.receiptName || "receipt";
+  document.body.appendChild(a); a.click(); a.remove();
+}
+
+function renderBackup(){
+  const el = document.getElementById("backup");
+  if(!el) return;
+  const countReceipts = state.expenses.filter(e=>e.receiptData).length;
+  const missing = state.expenses.filter(e=>!e.receiptData && !e.receiptName).length;
+  const y = new Date().getFullYear();
+  const ytdDed = state.expenses.filter(e=>Number(e.taxYear||new Date(e.date).getFullYear())===y).reduce((s,e)=>s+deductible(e),0);
+  // Small live note appended once
+  const existing = document.getElementById("backup-live-note");
+  if(existing) existing.remove();
+  const note = document.createElement("div");
+  note.id = "backup-live-note";
+  note.className = "card span-12";
+  note.innerHTML = `<h2>Current backup snapshot</h2>
+    <div class="row" style="flex-wrap:wrap">
+      <span class="pill">Books: ${state.books.length}</span>
+      <span class="pill">Tasks: ${state.tasks.length}</span>
+      <span class="pill">Expenses: ${state.expenses.length}</span>
+      <span class="pill green">Receipts attached: ${countReceipts}</span>
+      <span class="pill ${missing?'red':'green'}">Missing receipts: ${missing}</span>
+      <span class="pill gold">YTD deductible: ${money2(ytdDed)}</span>
+    </div>`;
+  const grid = el.querySelector(".dashboard-grid");
+  if(grid) grid.appendChild(note);
+}
+
+function csvEscape(v){
+  if(v === null || v === undefined) return "";
+  const s = String(v).replace(/\r?\n/g, " ");
+  return /[",\n]/.test(s) ? `"${s.replace(/"/g,'""')}"` : s;
+}
+function toCSV(headers, rows){
+  return [headers.join(","), ...rows.map(r => headers.map(h => csvEscape(r[h])).join(","))].join("\n");
+}
+function buildCSVFiles(){
+  const booksRows = state.books.map(b=>({
+    "Book ID":b.id,"Title":b.title,"Series":b.series,"Type":b.type,"Status":b.status,"Release Date":b.releaseDate,
+    "Price":b.price,"KENP Pages":b.kenp,"Word Count Goal":b.wordGoal,"Current Word Count":b.currentWords,
+    "Reader Action Goal":bookActionGoal(b),"Notes":b.notes
+  }));
+  const tasksRows = state.tasks.map(t=>({
+    "Task ID":t.id,"Task":t.name,"Category":t.category,"Related Book":titleById(t.bookId),"Due Date":t.dueDate,
+    "Repeat":t.repeat,"Repeat Day":t.repeatDay,"Priority":t.priority,"Done":t.done ? "Yes":"No","Notes":t.notes
+  }));
+  const expenseRows = state.expenses.map(e=>({
+    "Expense ID":e.id,"Date":e.date,"Vendor":e.vendor,"Category":e.category,"Amount":e.amount,
+    "Business Use %":e.businessPct,"Deductible Amount":deductible(e).toFixed(2),"Payment":e.payment,
+    "Tax Year":e.taxYear,"Receipt Attached":(e.receiptData||e.receiptName)?"Yes":"No","Receipt File":e.receiptName,"Notes":e.notes
+  }));
+  const metricRows = state.metrics.map(m=>{
+    const c = calcMetric(m);
+    const b = bookById(m.bookId);
+    const goal = b ? bookActionGoal(b) : state.settings.defaultReaderActionGoal;
+    return {
+      "Metric ID":m.id,"Month":m.month,"Book":titleById(m.bookId),"Ebook Sales":m.ebookSales,
+      "KU Pages":m.kuPages,"Estimated KU Full Reads":c.kuReads.toFixed(2),"Print Sales":m.printSales,
+      "Reader Actions":c.actions.toFixed(2),"Goal":goal,"Goal Gap":(c.actions-goal).toFixed(2),
+      "Ebook Royalty":m.ebookRoyalty,"KU Royalty":c.kuRoyalty.toFixed(2),"Print Royalty":m.printRoyalty,
+      "Total Gross":c.gross.toFixed(2),"Notes":m.notes
+    }
+  });
+  const receiptRows = state.expenses.map(e=>({
+    "Expense ID":e.id,"Date":e.date,"Vendor":e.vendor,"Amount":e.amount,"Category":e.category,
+    "Tax Year":e.taxYear,"Receipt Attached":e.receiptData?"Yes":"No","Receipt File":e.receiptName || "",
+    "Suggested Folder":`Receipts/${e.taxYear || ""}/${sanitizeName(e.category || "Other")}`
+  }));
+  return [
+    {name:"Author_Command_Center/CSV/Books.csv", data:toCSV(Object.keys(booksRows[0]||{"Book ID":""}), booksRows)},
+    {name:"Author_Command_Center/CSV/Tasks.csv", data:toCSV(Object.keys(tasksRows[0]||{"Task ID":""}), tasksRows)},
+    {name:"Author_Command_Center/CSV/Expenses.csv", data:toCSV(Object.keys(expenseRows[0]||{"Expense ID":""}), expenseRows)},
+    {name:"Author_Command_Center/CSV/Monthly_Metrics.csv", data:toCSV(Object.keys(metricRows[0]||{"Metric ID":""}), metricRows)},
+    {name:"Author_Command_Center/CSV/Receipts_Manifest.csv", data:toCSV(Object.keys(receiptRows[0]||{"Expense ID":""}), receiptRows)}
+  ];
+}
+function sanitizeName(s){
+  return String(s||"").trim().replace(/[\\/:*?"<>|#%{}^~[\]`]/g,"_").replace(/\s+/g,"_").slice(0,80) || "Untitled";
+}
+function strToU8(s){return new TextEncoder().encode(s)}
+function dataURLToU8(dataURL){
+  const parts = dataURL.split(",");
+  const bin = atob(parts[1] || "");
+  const arr = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) arr[i] = bin.charCodeAt(i);
+  return arr;
+}
+function crc32(u8){
+  let c = ~0;
+  for(let i=0;i<u8.length;i++){
+    c ^= u8[i];
+    for(let k=0;k<8;k++) c = (c>>>1) ^ (0xEDB88320 & -(c&1));
+  }
+  return (~c) >>> 0;
+}
+function dosTimeDate(date=new Date()){
+  const time = (date.getHours()<<11) | (date.getMinutes()<<5) | Math.floor(date.getSeconds()/2);
+  const dosDate = ((date.getFullYear()-1980)<<9) | ((date.getMonth()+1)<<5) | date.getDate();
+  return {time, date:dosDate};
+}
+function u16(n){const a=new Uint8Array(2); new DataView(a.buffer).setUint16(0,n,true); return a}
+function u32(n){const a=new Uint8Array(4); new DataView(a.buffer).setUint32(0,n,true); return a}
+function concatU8(parts){
+  const total = parts.reduce((s,p)=>s+p.length,0);
+  const out = new Uint8Array(total);
+  let o=0; parts.forEach(p=>{out.set(p,o); o+=p.length});
+  return out;
+}
+function makeZip(files){
+  const localParts = [], centralParts = [];
+  let offset = 0;
+  const dt = dosTimeDate();
+  files.forEach(file=>{
+    const nameBytes = strToU8(file.name);
+    const data = typeof file.data === "string" ? strToU8(file.data) : file.data;
+    const crc = crc32(data);
+    const local = concatU8([
+      u32(0x04034b50), u16(20), u16(0), u16(0), u16(dt.time), u16(dt.date), u32(crc),
+      u32(data.length), u32(data.length), u16(nameBytes.length), u16(0), nameBytes, data
+    ]);
+    const central = concatU8([
+      u32(0x02014b50), u16(20), u16(20), u16(0), u16(0), u16(dt.time), u16(dt.date), u32(crc),
+      u32(data.length), u32(data.length), u16(nameBytes.length), u16(0), u16(0), u16(0), u16(0),
+      u32(0), u32(offset), nameBytes
+    ]);
+    localParts.push(local);
+    centralParts.push(central);
+    offset += local.length;
+  });
+  const centralSize = centralParts.reduce((s,p)=>s+p.length,0);
+  const end = concatU8([
+    u32(0x06054b50), u16(0), u16(0), u16(files.length), u16(files.length),
+    u32(centralSize), u32(offset), u16(0)
+  ]);
+  return new Blob([...localParts, ...centralParts, end], {type:"application/zip"});
+}
+function downloadBlob(blob, filename){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+async function exportGoogleDriveZip(tryShare=false){
+  const stamp = new Date().toISOString().slice(0,10);
+  const files = [];
+  files.push({
+    name:"Author_Command_Center/ACC_Full_Restore_Backup.json",
+    data:JSON.stringify(state, null, 2)
+  });
+  files.push({
+    name:"Author_Command_Center/README_Backup.txt",
+    data:`Author Command Center backup created ${new Date().toLocaleString()}
+
+To restore:
+1. Open Author Command Center.
+2. Go to Backup.
+3. Use Import Restore JSON and choose ACC_Full_Restore_Backup.json.
+
+CSV files are for viewing/tax prep.
+Receipt files are organized by tax year and category.
+`
+  });
+  files.push(...buildCSVFiles());
+  state.expenses.forEach(e=>{
+    if(e.receiptData){
+      const category = sanitizeName(e.category || "Other");
+      const year = sanitizeName(e.taxYear || new Date().getFullYear());
+      const vendor = sanitizeName(e.vendor || "Vendor");
+      const date = sanitizeName(e.date || "NoDate");
+      const original = sanitizeName(e.receiptName || "receipt");
+      files.push({
+        name:`Author_Command_Center/Receipts/${year}/${category}/${date}_${vendor}_${original}`,
+        data:dataURLToU8(e.receiptData)
+      });
+    }
+  });
+  const blob = makeZip(files);
+  const filename = `Author_Command_Center_Google_Drive_Backup_${stamp}.zip`;
+  if(tryShare && navigator.canShare){
+    try{
+      const file = new File([blob], filename, {type:"application/zip"});
+      if(navigator.canShare({files:[file]})){
+        await navigator.share({files:[file], title:"Author Command Center Backup", text:"Backup ZIP for Google Drive"});
+        showToast("Backup shared.");
+        return;
+      }
+    }catch(err){
+      // If sharing is cancelled or unsupported, fall back to download.
+    }
+  }
+  downloadBlob(blob, filename);
+  showToast("Backup ZIP created.");
+}
+
+
+function exportData(){
+  const data = JSON.stringify(state, null, 2);
+  const blob = new Blob([data], {type:"application/json"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = "author-command-center-backup.json";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+function importData(e){
+  const file = e.target.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const imported = JSON.parse(reader.result);
+      state = imported;
+      saveState(); render(); showToast("Backup imported.");
+    }catch(err){alert("Could not import that file.");}
+  };
+  reader.readAsText(file);
+}
+function resetDemoData(){
+  if(!confirm("Reset to demo data? This replaces anything stored in this browser.")) return;
+  state = JSON.parse(JSON.stringify(defaultState));
+  saveState(); render(); showToast("Demo data reset.");
+}
+function fileToDataURL(file){
+  return new Promise((resolve,reject)=>{
+    const r = new FileReader();
+    r.onload=()=>resolve(r.result);
+    r.onerror=reject;
+    r.readAsDataURL(file);
+  });
+}
+function escapeHTML(s=""){
+  return String(s).replace(/[&<>"']/g, m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+function attr(s=""){return escapeHTML(s)}
+render();
+
+if("serviceWorker" in navigator && location.protocol !== "file:"){
+  window.addEventListener("load", ()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+}
+</script>
+</body>
+</html>
