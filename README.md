@@ -1,18 +1,31 @@
-Author Command Center v8 — Task Add/Edit Null Fix
+Author Command Center v9 — Metrics Cleanup + Trends
 
-Fixes:
-- Add Task now opens the form instead of throwing: null is not an object (evaluating 't.name').
-- Add/Edit Book, Expense, Task, and Metric forms now safely handle empty/new records.
-- Header should show v8.
+What's new:
+- Removed the Quick Add Metric section.
+- The metric popup form remains the primary way to add monthly metrics.
+- Metrics page now shows saved metrics plus current-month summary cards.
+- Added a Trends tab with:
+  - Current vs previous month gross
+  - Month-over-month change
+  - Annualized estimate
+  - Gross royalty trend chart
+  - Reader action mix chart
+  - Actions vs goal chart
+  - Top books this month
+  - Monthly report comparison table
+  - Metrics CSV export
 
-Upload:
-1. Unzip this package.
-2. Upload/overwrite all files in the GitHub repository root.
-3. Commit changes.
-4. Open your GitHub Pages link with ?v=8:
-   https://YOURUSERNAME.github.io/author-command-center/?v=8
+Deploy:
+1. Upload/overwrite all files in your GitHub repository with this folder's contents.
+2. Commit changes.
+3. Open your GitHub Pages URL with ?v=9:
+   https://YOURUSERNAME.github.io/author-command-center/?v=9
 
-If your phone still shows an old version:
-- Reload the ?v=8 link.
-- Delete and re-add the Home Screen icon.
-- In the browser menu, open a new/private tab and load ?v=8.
+If your phone still shows the old version:
+- Delete the old Home Screen icon.
+- Open the ?v=9 URL.
+- Add the ?v=9 page to Home Screen again.
+
+Private data:
+- This app package is public-safe.
+- Import your private JSON from Backup > Import Restore JSON after deployment.

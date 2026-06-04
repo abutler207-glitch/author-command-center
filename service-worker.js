@@ -1,4 +1,3 @@
-// Author Command Center v8 no-cache service worker cleanup
 self.addEventListener("install", event => self.skipWaiting());
 self.addEventListener("activate", event => {
   event.waitUntil(

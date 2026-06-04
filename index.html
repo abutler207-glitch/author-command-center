@@ -249,7 +249,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v8</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v9</div>
         </div>
       </div>
       <div class="toolbar">
@@ -272,6 +272,7 @@
       <button class="tab" data-view="money">Money</button>
       <button class="tab" data-view="receipts">Receipts</button>
       <button class="tab" data-view="metrics">Metrics</button>
+      <button class="tab" data-view="trends">Trends</button>
       <button class="tab" data-view="backup">Backup</button>
       <button class="tab" data-view="settings">Settings</button>
     </nav>
@@ -417,67 +418,119 @@
       <div class="dashboard-grid grid">
         <div class="card span-12">
           <div class="row between">
-            <h2>Monthly Book Metrics</h2>
+            <div>
+              <h2>Monthly Book Metrics</h2>
+              <div class="muted">Saved KDP/KU/print entries by month and title.</div>
+            </div>
             <button class="small primary" type="button" onclick="openMetricSafely()">+ Monthly Metric</button>
           </div>
-          <div id="metric-helper" class="footer-note">Use Quick Add below. If the popup button ever fails, this form still adds metrics directly.</div>
         </div>
 
-        <div class="card span-12">
-          <h2>Quick Add Metric</h2>
-          <div id="quick-metric-no-books" class="empty" style="display:none">
-            Add or import at least one book first. Then this metric form will activate.
-            <div style="margin-top:12px"><button class="primary" type="button" data-action="add-book">+ Add Book</button></div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Current month gross</div>
+            <div id="metrics-gross-current" class="value">$0</div>
           </div>
-          <form id="quick-metric-form" onsubmit="saveQuickMetric(event)" style="padding:0">
-            <div class="form-grid">
-              <div>
-                <label>Month</label>
-                <input type="month" name="month" id="qm-month">
-              </div>
-              <div>
-                <label>Book</label>
-                <select name="bookId" id="qm-bookId"></select>
-              </div>
-              <div>
-                <label>Ebook Sales</label>
-                <input type="number" name="ebookSales" id="qm-ebookSales" value="0" inputmode="numeric">
-              </div>
-              <div>
-                <label>KU Pages Read</label>
-                <input type="number" name="kuPages" id="qm-kuPages" value="0" inputmode="numeric">
-              </div>
-              <div>
-                <label>Print Sales</label>
-                <input type="number" name="printSales" id="qm-printSales" value="0" inputmode="numeric">
-              </div>
-              <div>
-                <label>Ebook Royalty $</label>
-                <input type="number" step="0.01" name="ebookRoyalty" id="qm-ebookRoyalty" value="0" inputmode="decimal">
-              </div>
-              <div>
-                <label>KU Royalty Override $</label>
-                <input type="number" step="0.01" name="kuRoyalty" id="qm-kuRoyalty" placeholder="optional" inputmode="decimal">
-              </div>
-              <div>
-                <label>Print Royalty $</label>
-                <input type="number" step="0.01" name="printRoyalty" id="qm-printRoyalty" value="0" inputmode="decimal">
-              </div>
-              <div class="full">
-                <label>Notes</label>
-                <textarea name="notes" id="qm-notes" placeholder="Promo week, ad test, launch month, etc."></textarea>
-              </div>
-            </div>
-            <div class="form-actions">
-              <button type="button" onclick="clearQuickMetricForm()">Clear</button>
-              <button class="primary" type="submit">Save Metric</button>
-            </div>
-          </form>
+          <div class="note">All books combined</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Current month actions</div>
+            <div id="metrics-actions-current" class="value">0</div>
+          </div>
+          <div class="note">Sales + KU reads + print</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Goal gap</div>
+            <div id="metrics-gap-current" class="value">0</div>
+          </div>
+          <div class="note">Against live book goals</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">YTD gross</div>
+            <div id="metrics-gross-ytd" class="value">$0</div>
+          </div>
+          <div class="note">Entered metrics only</div>
         </div>
 
         <div class="card span-12">
-          <h2>Saved Metrics</h2>
+          <div class="row between">
+            <h2>Saved Metrics</h2>
+            <button class="small" type="button" onclick="exportMetricsCSV()">Export Metrics CSV</button>
+          </div>
           <div class="table-wrap"><table id="metrics-table"></table></div>
+          <div class="footer-note">Use the Trends tab for month-over-month comparisons, projections, and charts.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="trends" class="views">
+      <div class="dashboard-grid grid">
+        <div class="card span-12">
+          <div class="row between">
+            <div>
+              <h2>Trends & Reports</h2>
+              <div class="muted">Monthly comparisons, estimates, and simple charts from saved metrics.</div>
+            </div>
+            <button class="small" type="button" onclick="renderTrends()">Refresh</button>
+          </div>
+        </div>
+
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Last 30-day gross</div>
+            <div id="trend-current-gross" class="value">$0</div>
+          </div>
+          <div class="note">Current entered month</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Previous month gross</div>
+            <div id="trend-prev-gross" class="value">$0</div>
+          </div>
+          <div class="note">Comparison baseline</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">MoM change</div>
+            <div id="trend-mom-change" class="value">0%</div>
+          </div>
+          <div class="note">Gross royalty change</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Annualized estimate</div>
+            <div id="trend-annualized" class="value">$0</div>
+          </div>
+          <div class="note">Current month × 12</div>
+        </div>
+
+        <div class="card span-8">
+          <h2>Gross royalty trend</h2>
+          <canvas id="grossTrendChart" height="260"></canvas>
+          <div class="footer-note">Shows total gross from metrics entered by month.</div>
+        </div>
+        <div class="card span-4">
+          <h2>Reader action mix</h2>
+          <canvas id="actionMixChart" height="260"></canvas>
+          <div class="footer-note">Current month split: ebook sales, KU full-read equivalents, and print sales.</div>
+        </div>
+
+        <div class="card span-6">
+          <h2>Reader actions vs goal</h2>
+          <canvas id="actionsGoalChart" height="250"></canvas>
+          <div class="footer-note">Current month total actions versus live-book goal.</div>
+        </div>
+        <div class="card span-6">
+          <h2>Top books this month</h2>
+          <div class="table-wrap"><table id="top-books-table"></table></div>
+        </div>
+
+        <div class="card span-12">
+          <h2>Monthly Report Comparison</h2>
+          <div class="table-wrap"><table id="trend-report-table"></table></div>
         </div>
       </div>
     </section>
@@ -557,7 +610,7 @@
   <div id="toast" class="toast"></div>
 
 <script>
-const STORAGE_KEY = "author-command-center-v1";
+const STORAGE_KEY = "author-command-center-v9-trends";
 
 const defaultState = {
   "settings": {
@@ -688,7 +741,7 @@ function render(){
   renderMoney();
   renderReceipts();
   renderMetrics();
-  renderQuickMetricForm();
+  renderTrends();
   renderBackup();
   renderSettings();
 }
@@ -916,7 +969,248 @@ function openMetricSafely(){
 }
 
 
+
+function metricMonthKey(m){
+  return (m.month || "").slice(0,7);
+}
+function monthLabel(key){
+  if(!key) return "";
+  const [y, mo] = key.split("-");
+  const d = new Date(Number(y), Number(mo)-1, 1);
+  return d.toLocaleDateString(undefined,{month:"short", year:"2-digit"});
+}
+function getMonthlySummary(){
+  const map = {};
+  (state.metrics || []).forEach(m=>{
+    const key = metricMonthKey(m);
+    if(!key) return;
+    const c = calcMetric(m);
+    if(!map[key]) map[key] = {month:key, gross:0, actions:0, ebookSales:0, kuPages:0, kuReads:0, printSales:0, goal:0, entries:0};
+    map[key].gross += c.gross;
+    map[key].actions += c.actions;
+    map[key].ebookSales += Number(m.ebookSales||0);
+    map[key].kuPages += Number(m.kuPages||0);
+    map[key].kuReads += c.kuReads;
+    map[key].printSales += Number(m.printSales||0);
+    map[key].entries += 1;
+  });
+  Object.values(map).forEach(row=>{
+    // Goal = sum goals for books that had metric entries that month, with a minimum of live-book goal if current month.
+    const bookIds = new Set((state.metrics||[]).filter(m=>metricMonthKey(m)===row.month).map(m=>m.bookId));
+    row.goal = Array.from(bookIds).reduce((s,id)=>{
+      const b = bookById(id);
+      return s + (b ? bookActionGoal(b) : Number(state.settings.defaultReaderActionGoal||100));
+    }, 0);
+    if(row.month === currentMonthKey()){
+      row.goal = Math.max(row.goal, publishedBooks().reduce((s,b)=>s+bookActionGoal(b),0));
+    }
+  });
+  return Object.values(map).sort((a,b)=>a.month.localeCompare(b.month));
+}
+function currentMetricSummary(){
+  const key = currentMonthKey();
+  const summaries = getMonthlySummary();
+  return summaries.find(s=>s.month===key) || {month:key,gross:0,actions:0,ebookSales:0,kuPages:0,kuReads:0,printSales:0,goal:publishedBooks().reduce((s,b)=>s+bookActionGoal(b),0),entries:0};
+}
+function previousMonthKey(key=currentMonthKey()){
+  const [y,m] = key.split("-").map(Number);
+  const d = new Date(y, m-2, 1);
+  return d.toISOString().slice(0,7);
+}
+function renderMetricSummaryCards(){
+  const cur = currentMetricSummary();
+  const y = new Date().getFullYear().toString();
+  const ytd = (state.metrics||[]).filter(m=>(m.month||"").startsWith(y)).reduce((s,m)=>s+calcMetric(m).gross,0);
+  const gap = cur.actions - (cur.goal || 0);
+  const setText = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent=txt; };
+  setText("metrics-gross-current", money(cur.gross));
+  setText("metrics-actions-current", num(cur.actions));
+  setText("metrics-gap-current", (gap>=0?"+":"") + num(gap));
+  const gapEl = document.getElementById("metrics-gap-current");
+  if(gapEl){ gapEl.className = "value " + (gap>=0 ? "good" : "bad"); }
+  setText("metrics-gross-ytd", money(ytd));
+}
+function canvasSetup(canvas){
+  const ctx = canvas.getContext("2d");
+  const rect = canvas.getBoundingClientRect();
+  const ratio = window.devicePixelRatio || 1;
+  const w = Math.max(300, rect.width || canvas.clientWidth || 300);
+  const h = Number(canvas.getAttribute("height")) || 260;
+  canvas.width = w * ratio;
+  canvas.height = h * ratio;
+  canvas.style.width = w + "px";
+  canvas.style.height = h + "px";
+  ctx.setTransform(ratio,0,0,ratio,0,0);
+  return {ctx,w,h};
+}
+function chartColors(){
+  return {
+    text:"#f4f7fb", muted:"#aeb8c7", line:"#2a3242", accent:"#c9a86a", green:"#6bd79b", blue:"#8fc7ff", warn:"#ffca66", bad:"#ff7a7a"
+  };
+}
+function drawEmptyChart(canvas, message){
+  if(!canvas) return;
+  const {ctx,w,h} = canvasSetup(canvas);
+  const c = chartColors();
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = c.line; ctx.strokeRect(0.5,0.5,w-1,h-1);
+  ctx.fillStyle = c.muted; ctx.font = "14px system-ui";
+  ctx.textAlign = "center"; ctx.fillText(message, w/2, h/2);
+}
+function drawLineChart(canvas, labels, values, prefix="$"){
+  if(!canvas) return;
+  if(!values.length){ drawEmptyChart(canvas, "No data yet"); return; }
+  const {ctx,w,h} = canvasSetup(canvas);
+  const c = chartColors();
+  const pad = {l:44,r:18,t:22,b:44};
+  const max = Math.max(...values, 1);
+  const min = 0;
+  ctx.clearRect(0,0,w,h);
+  ctx.strokeStyle = c.line; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let i=0;i<=4;i++){
+    const y = pad.t + (h-pad.t-pad.b)*i/4;
+    ctx.moveTo(pad.l,y); ctx.lineTo(w-pad.r,y);
+  }
+  ctx.stroke();
+  ctx.fillStyle = c.muted; ctx.font = "12px system-ui"; ctx.textAlign = "right";
+  for(let i=0;i<=4;i++){
+    const val = max - (max-min)*i/4;
+    const y = pad.t + (h-pad.t-pad.b)*i/4 + 4;
+    ctx.fillText(prefix==="$" ? money(val) : (prefix + Math.round(val)), pad.l-8, y);
+  }
+  const xFor = i => values.length===1 ? pad.l + (w-pad.l-pad.r)/2 : pad.l + (w-pad.l-pad.r)*i/(values.length-1);
+  const yFor = v => pad.t + (h-pad.t-pad.b)*(1-(v-min)/(max-min || 1));
+  ctx.strokeStyle = c.accent; ctx.lineWidth = 3; ctx.beginPath();
+  values.forEach((v,i)=>{ const x=xFor(i), y=yFor(v); if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y); });
+  ctx.stroke();
+  values.forEach((v,i)=>{ const x=xFor(i), y=yFor(v); ctx.fillStyle=c.accent; ctx.beginPath(); ctx.arc(x,y,4,0,Math.PI*2); ctx.fill(); });
+  ctx.fillStyle = c.muted; ctx.font = "11px system-ui"; ctx.textAlign = "center";
+  labels.forEach((lab,i)=>{ if(values.length<=8 || i%Math.ceil(values.length/8)===0) ctx.fillText(lab, xFor(i), h-18); });
+}
+function drawDonutChart(canvas, labels, values){
+  if(!canvas) return;
+  const total = values.reduce((s,v)=>s+v,0);
+  if(!total){ drawEmptyChart(canvas, "No current month actions"); return; }
+  const {ctx,w,h} = canvasSetup(canvas);
+  const colors = chartColors();
+  const palette = [colors.accent, colors.blue, colors.green, colors.warn];
+  ctx.clearRect(0,0,w,h);
+  const cx = w/2, cy = h/2-18, r = Math.min(w,h)*0.26, inner = r*0.58;
+  let a = -Math.PI/2;
+  values.forEach((v,i)=>{
+    const next = a + (v/total)*Math.PI*2;
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.arc(cx,cy,r,a,next); ctx.closePath();
+    ctx.fillStyle = palette[i%palette.length]; ctx.fill(); a = next;
+  });
+  ctx.beginPath(); ctx.arc(cx,cy,inner,0,Math.PI*2); ctx.fillStyle="#151922"; ctx.fill();
+  ctx.fillStyle = colors.text; ctx.font = "bold 18px system-ui"; ctx.textAlign = "center"; ctx.fillText(num(total), cx, cy+6);
+  let y = h-54;
+  labels.forEach((lab,i)=>{
+    const x = 24 + (i%2)*(w/2);
+    const yy = y + Math.floor(i/2)*24;
+    ctx.fillStyle = palette[i%palette.length]; ctx.fillRect(x, yy-10, 12, 12);
+    ctx.fillStyle = colors.muted; ctx.font = "12px system-ui"; ctx.textAlign = "left";
+    ctx.fillText(`${lab}: ${num(values[i])}`, x+18, yy);
+  });
+}
+function drawBarCompare(canvas, actual, goal){
+  if(!canvas) return;
+  const {ctx,w,h} = canvasSetup(canvas);
+  const c = chartColors();
+  const max = Math.max(actual, goal, 1);
+  ctx.clearRect(0,0,w,h);
+  const bars = [
+    {label:"Actual", val:actual, color:c.accent},
+    {label:"Goal", val:goal, color:c.blue}
+  ];
+  const padL=80, padR=24, barH=42, startY=68;
+  ctx.font = "13px system-ui";
+  bars.forEach((b,i)=>{
+    const y = startY + i*72;
+    ctx.fillStyle = c.muted; ctx.textAlign="right"; ctx.fillText(b.label, padL-12, y+27);
+    ctx.strokeStyle = c.line; ctx.strokeRect(padL, y, w-padL-padR, barH);
+    ctx.fillStyle = b.color; ctx.fillRect(padL, y, (w-padL-padR)*(b.val/max), barH);
+    ctx.fillStyle = c.text; ctx.textAlign="left"; ctx.font = "bold 14px system-ui"; ctx.fillText(num(b.val), padL+8, y+27);
+  });
+}
+function renderTrends(){
+  const trendsEl = document.getElementById("trends");
+  if(!trendsEl) return;
+  const summaries = getMonthlySummary();
+  const curKey = currentMonthKey();
+  const prevKey = previousMonthKey(curKey);
+  const cur = summaries.find(s=>s.month===curKey) || currentMetricSummary();
+  const prev = summaries.find(s=>s.month===prevKey) || {gross:0,actions:0,ebookSales:0,kuReads:0,printSales:0,goal:0};
+  const mom = prev.gross ? ((cur.gross-prev.gross)/prev.gross*100) : (cur.gross ? 100 : 0);
+  const setText = (id, txt) => { const el=document.getElementById(id); if(el) el.textContent=txt; };
+  setText("trend-current-gross", money(cur.gross));
+  setText("trend-prev-gross", money(prev.gross));
+  setText("trend-mom-change", (mom>=0?"+":"") + Math.round(mom) + "%");
+  const momEl = document.getElementById("trend-mom-change");
+  if(momEl){ momEl.className = "value " + (mom>=0 ? "good" : "bad"); }
+  setText("trend-annualized", money(cur.gross*12));
+
+  const last12 = summaries.slice(-12);
+  drawLineChart(document.getElementById("grossTrendChart"), last12.map(s=>monthLabel(s.month)), last12.map(s=>s.gross), "$");
+  drawDonutChart(document.getElementById("actionMixChart"), ["Ebook", "KU", "Print"], [cur.ebookSales, cur.kuReads, cur.printSales]);
+  drawBarCompare(document.getElementById("actionsGoalChart"), cur.actions, cur.goal || 0);
+
+  const currentMetrics = (state.metrics||[]).filter(m=>metricMonthKey(m)===curKey);
+  const byBook = {};
+  currentMetrics.forEach(m=>{
+    const btitle = titleById(m.bookId) || "Unknown";
+    const c = calcMetric(m);
+    if(!byBook[btitle]) byBook[btitle] = {title:btitle,gross:0,actions:0,kuPages:0};
+    byBook[btitle].gross += c.gross; byBook[btitle].actions += c.actions; byBook[btitle].kuPages += Number(m.kuPages||0);
+  });
+  const topRows = Object.values(byBook).sort((a,b)=>b.gross-a.gross).slice(0,8).map(r=>`
+    <tr><td>${escapeHTML(r.title)}</td><td>${money2(r.gross)}</td><td>${num(r.actions)}</td><td>${num(r.kuPages)}</td></tr>
+  `).join("");
+  const topTable = document.getElementById("top-books-table");
+  if(topTable) topTable.innerHTML = `<thead><tr><th>Book</th><th>Gross</th><th>Actions</th><th>KU Pages</th></tr></thead><tbody>${topRows || '<tr><td colspan="4" class="muted">No metrics for current month yet.</td></tr>'}</tbody>`;
+
+  const reportRows = summaries.slice(-12).reverse().map((s,i,arr)=>{
+    const prevS = summaries[summaries.findIndex(x=>x.month===s.month)-1];
+    const change = prevS && prevS.gross ? ((s.gross-prevS.gross)/prevS.gross*100) : "";
+    return `<tr>
+      <td>${monthLabel(s.month)}</td>
+      <td>${money2(s.gross)}</td>
+      <td>${num(s.actions)}</td>
+      <td>${num(s.ebookSales)}</td>
+      <td>${num(s.kuReads)}</td>
+      <td>${num(s.printSales)}</td>
+      <td>${s.goal ? num(s.actions-s.goal) : "—"}</td>
+      <td class="${change==="" ? "" : (change>=0 ? "good":"bad")}">${change==="" ? "—" : (change>=0?"+":"") + Math.round(change) + "%"}</td>
+    </tr>`;
+  }).join("");
+  const reportTable = document.getElementById("trend-report-table");
+  if(reportTable) reportTable.innerHTML = `<thead><tr><th>Month</th><th>Gross</th><th>Actions</th><th>Ebook</th><th>KU Reads</th><th>Print</th><th>Goal Gap</th><th>MoM</th></tr></thead><tbody>${reportRows || '<tr><td colspan="8" class="muted">No monthly metrics yet.</td></tr>'}</tbody>`;
+}
+function exportMetricsCSV(){
+  const headers = ["Month","Book","Ebook Sales","KU Pages","Estimated KU Reads","Print Sales","Reader Actions","Gross","Notes"];
+  const rows = (state.metrics||[]).map(m=>{
+    const c = calcMetric(m);
+    return {
+      "Month":m.month || "",
+      "Book":titleById(m.bookId) || "",
+      "Ebook Sales":m.ebookSales || 0,
+      "KU Pages":m.kuPages || 0,
+      "Estimated KU Reads":c.kuReads.toFixed(2),
+      "Print Sales":m.printSales || 0,
+      "Reader Actions":c.actions.toFixed(2),
+      "Gross":c.gross.toFixed(2),
+      "Notes":m.notes || ""
+    };
+  });
+  const csv = toCSV(headers, rows);
+  const blob = new Blob([csv], {type:"text/csv"});
+  downloadBlob(blob, "Author_Command_Center_Metrics.csv");
+}
+
+
 function renderMetrics(){
+  renderMetricSummaryCards();
   const rows = state.metrics.slice().sort((a,b)=>(b.month||"").localeCompare(a.month||"")).map(m=>{
     const c = calcMetric(m);
     const b = bookById(m.bookId);
@@ -1391,7 +1685,7 @@ function exportData(){
   const blob = new Blob([data], {type:"application/json"});
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
-  a.href = url; a.download = "author-command-center-backup.json";
+  a.href = url; a.download = "author-command-center-v9-trends";
   document.body.appendChild(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url),1000);
 }
