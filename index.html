@@ -735,6 +735,49 @@
       line-height: 1.4;
     }
 
+  
+    /* v30 receipt preview */
+    .receipt-preview-wrap {
+      padding: 16px;
+    }
+    .receipt-preview-box {
+      margin-top: 14px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: rgba(255,255,255,.03);
+      overflow: hidden;
+      display: grid;
+      place-items: center;
+      min-height: 220px;
+    }
+    .receipt-full-preview {
+      display: block;
+      max-width: 100%;
+      max-height: 68vh;
+      object-fit: contain;
+      background: #fff;
+    }
+    .receipt-pdf-preview {
+      width: 100%;
+      height: 68vh;
+      border: none;
+      background: #fff;
+    }
+    @media(max-width:520px){
+      .receipt-preview-wrap {
+        padding: 12px;
+      }
+      .receipt-preview-box {
+        min-height: 180px;
+      }
+      .receipt-full-preview {
+        max-height: 58vh;
+      }
+      .receipt-pdf-preview {
+        height: 58vh;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -744,7 +787,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v28</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v30</div>
         </div>
       </div>
       <div class="toolbar">
@@ -1213,7 +1256,7 @@
       <div class="dashboard-grid grid">
         <div class="card span-7">
           <h2>Google Drive Backup</h2>
-          <p class="muted">Create one ZIP file that contains your full restore backup, CSV exports, a receipt manifest, and receipt files organized into folders. Your private data stays in your browser and backups — not in GitHub.</p>
+          <p class="muted">Create one dated ZIP file that contains your full restore backup, CSV exports, a receipt manifest, and receipt files organized into folders. Your private data stays in your browser and backups — not in GitHub.</p>
           <div class="stack">
             <button class="primary" data-action="drive-backup-share">Share / Save Google Drive Backup ZIP</button>
             <button data-action="drive-backup-download">Download Backup ZIP</button>
@@ -1298,6 +1341,8 @@
 <script>
 const STORAGE_KEY = "author-command-center-v9-trends";
 
+
+const APP_VERSION = "v30";
 const defaultState = {
   "settings": {
     "kuRate": 0.00482,
@@ -1396,6 +1441,12 @@ function inCurrentWeek(iso){
 }
 function currentMonthKey(){
   return new Date().toISOString().slice(0,7);
+}
+function backupDateStamp(){
+  return new Date().toISOString().slice(0,10);
+}
+function backupFileBase(label="Backup"){
+  return `Author_Command_Center_${label}_${APP_VERSION}_${backupDateStamp()}`;
 }
 function showToast(msg){
   const t = document.getElementById("toast");
@@ -1679,7 +1730,7 @@ function renderReceipts(){
         </div>
       </div>
       <div class="actions">
-        ${e.receiptData?`<button class="small" data-action="download-receipt" data-id="${e.id}">Open/Save</button>`:""}
+        ${e.receiptData?`<button class="small primary" data-action="preview-receipt" data-id="${e.id}">Preview</button><button class="small" data-action="download-receipt" data-id="${e.id}">Open/Save</button>`:""}
         <button class="small" data-action="edit-expense" data-id="${e.id}">Edit</button>
       </div>
     </div>`;
@@ -2681,6 +2732,48 @@ function generateRecurringTasks(){
   state.tasks.push(...created);
   saveState(); render(); showToast(created.length ? `Created ${created.length} recurring task(s).` : "No recurring tasks needed right now.");
 }
+
+function previewReceipt(id){
+  const e = state.expenses.find(x=>x.id===id);
+  if(!e || !e.receiptData){
+    showToast("No receipt attached.");
+    return;
+  }
+  currentModal = "receiptPreview";
+  editingId = null;
+  const title = document.getElementById("modal-title");
+  const body = document.getElementById("modal-body");
+  if(title) title.textContent = "Receipt Preview";
+  const name = escapeHTML(e.receiptName || "Receipt");
+  const vendor = escapeHTML(e.vendor || "");
+  const amount = money2(e.amount || 0);
+  let preview = "";
+  if((e.receiptType || "").startsWith("image/")){
+    preview = `<img src="${e.receiptData}" alt="${name}" class="receipt-full-preview">`;
+  } else if((e.receiptType || "").includes("pdf") || (e.receiptName || "").toLowerCase().endsWith(".pdf")){
+    preview = `<iframe src="${e.receiptData}" class="receipt-pdf-preview" title="${name}"></iframe>
+      <div class="footer-note">If the PDF does not display on your phone, tap Open/Save below.</div>`;
+  } else {
+    preview = `<div class="empty">Preview may not be available for this file type. Use Open/Save.</div>`;
+  }
+  if(body) body.innerHTML = `<div class="receipt-preview-wrap">
+    <div class="row between" style="gap:10px;align-items:flex-start">
+      <div>
+        <div class="book-title">${vendor || "Receipt"} • ${amount}</div>
+        <div class="book-sub">${dateFmt(e.date)} • ${escapeHTML(e.category || "")}</div>
+        <div class="footer-note">${name}</div>
+      </div>
+    </div>
+    <div class="receipt-preview-box">${preview}</div>
+    <div class="form-actions">
+      <button type="button" data-action="download-receipt" data-id="${e.id}">Open/Save</button>
+      <button type="button" data-action="close-modal">Close</button>
+    </div>
+  </div>`;
+  document.getElementById("modal-backdrop").classList.add("active");
+}
+
+
 function downloadReceipt(id){
   const e = state.expenses.find(x=>x.id===id);
   if(!e || !e.receiptData) return;
@@ -2878,7 +2971,7 @@ Receipt files are organized by tax year and category.
     }
   });
   const blob = makeZip(files);
-  const filename = `Author_Command_Center_Google_Drive_Backup_${stamp}.zip`;
+  const filename = backupFileBase("Backup") + ".zip";
   if(tryShare && navigator.canShare){
     try{
       const file = new File([blob], filename, {type:"application/zip"});
@@ -2962,6 +3055,7 @@ function handleAction(action, id, btn){
     case "add-metric-book": openModal("metric", null, id); break;
     case "edit-expense": editItem("expense", id); break;
     case "edit-metric": editItem("metric", id); break;
+    case "preview-receipt": previewReceipt(id); break;
     case "download-receipt": downloadReceipt(id); break;
     default:
       console.warn("Unknown action:", action);
