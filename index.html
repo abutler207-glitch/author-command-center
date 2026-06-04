@@ -248,15 +248,15 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v6</div>
         </div>
       </div>
       <div class="toolbar">
-        <button class="small primary" onclick="openModal('task')">+ Task</button>
-        <button class="small" onclick="openModal('expense')">+ Expense</button>
-        <button class="small" onclick="openModal('book')">+ Book</button>
-        <button class="small ghost" onclick="exportData()">Export JSON</button>
-        <button class="small primary" onclick="exportGoogleDriveZip(true)">Drive Backup</button>
+        <button class="small primary" data-action="add-task">+ Task</button>
+        <button class="small" data-action="add-expense">+ Expense</button>
+        <button class="small" data-action="add-book">+ Book</button>
+        <button class="small ghost" data-action="export-json">Export JSON</button>
+        <button class="small primary" data-action="drive-backup-share">Drive Backup</button>
         <label class="btn small ghost" for="import-file">Import</label>
         <input id="import-file" type="file" accept="application/json" style="display:none" onchange="importData(event)">
       </div>
@@ -309,7 +309,7 @@
         <div class="card span-7">
           <div class="row between">
             <h2>This Week</h2>
-            <button class="small" onclick="openModal('task')">Add task</button>
+            <button class="small" data-action="add-task">Add task</button>
           </div>
           <div id="dash-week-list" class="stack"></div>
         </div>
@@ -331,7 +331,7 @@
         <div class="card span-6">
           <div class="row between">
             <h2>Upcoming releases</h2>
-            <button class="small" onclick="openModal('book')">Add book</button>
+            <button class="small" data-action="add-book">Add book</button>
           </div>
           <div id="dash-upcoming" class="cards-list"></div>
         </div>
@@ -359,8 +359,8 @@
             <div class="muted" id="week-range"></div>
           </div>
           <div class="row">
-            <button class="small" onclick="generateRecurringTasks()">Generate recurring</button>
-            <button class="small primary" onclick="openModal('task')">+ Task</button>
+            <button class="small" data-action="generate-recurring">Generate recurring</button>
+            <button class="small primary" data-action="add-task">+ Task</button>
           </div>
         </div>
         <div id="week-list" class="stack"></div>
@@ -371,7 +371,7 @@
       <div class="card">
         <div class="row between">
           <h2>Books</h2>
-          <button class="small primary" onclick="openModal('book')">+ Book</button>
+          <button class="small primary" data-action="add-book">+ Book</button>
         </div>
         <div id="books-list" class="cards-list"></div>
       </div>
@@ -394,7 +394,7 @@
         <div class="card span-12">
           <div class="row between">
             <h2>Expenses</h2>
-            <button class="small primary" onclick="openModal('expense')">+ Expense</button>
+            <button class="small primary" data-action="add-expense">+ Expense</button>
           </div>
           <div class="table-wrap"><table id="expenses-table"></table></div>
         </div>
@@ -405,7 +405,7 @@
       <div class="card">
         <div class="row between">
           <h2>Receipt Vault</h2>
-          <button class="small primary" onclick="openModal('expense')">+ Expense / Receipt</button>
+          <button class="small primary" data-action="add-expense">+ Expense / Receipt</button>
         </div>
         <div class="footer-note">Attach screenshots, photos, or PDFs to expense records. This prototype stores them locally in your browser on this device. Use Export Backup regularly.</div>
         <div id="receipt-list" class="cards-list" style="margin-top:14px"></div>
@@ -413,15 +413,73 @@
     </section>
 
     <section id="metrics" class="views">
-      <div class="card">
-        <div class="row between">
-          <h2>Monthly Book Metrics</h2>
-          <button class="small primary" onclick="openModal('metric')">+ Monthly Metric</button>
+      <div class="dashboard-grid grid">
+        <div class="card span-12">
+          <div class="row between">
+            <h2>Monthly Book Metrics</h2>
+            <button class="small primary" type="button" onclick="openMetricSafely()">+ Monthly Metric</button>
+          </div>
+          <div id="metric-helper" class="footer-note">Use Quick Add below. If the popup button ever fails, this form still adds metrics directly.</div>
         </div>
-        <div class="table-wrap"><table id="metrics-table"></table></div>
+
+        <div class="card span-12">
+          <h2>Quick Add Metric</h2>
+          <div id="quick-metric-no-books" class="empty" style="display:none">
+            Add or import at least one book first. Then this metric form will activate.
+            <div style="margin-top:12px"><button class="primary" type="button" onclick="openModal('book')">+ Add Book</button></div>
+          </div>
+          <form id="quick-metric-form" onsubmit="saveQuickMetric(event)" style="padding:0">
+            <div class="form-grid">
+              <div>
+                <label>Month</label>
+                <input type="month" name="month" id="qm-month">
+              </div>
+              <div>
+                <label>Book</label>
+                <select name="bookId" id="qm-bookId"></select>
+              </div>
+              <div>
+                <label>Ebook Sales</label>
+                <input type="number" name="ebookSales" id="qm-ebookSales" value="0" inputmode="numeric">
+              </div>
+              <div>
+                <label>KU Pages Read</label>
+                <input type="number" name="kuPages" id="qm-kuPages" value="0" inputmode="numeric">
+              </div>
+              <div>
+                <label>Print Sales</label>
+                <input type="number" name="printSales" id="qm-printSales" value="0" inputmode="numeric">
+              </div>
+              <div>
+                <label>Ebook Royalty $</label>
+                <input type="number" step="0.01" name="ebookRoyalty" id="qm-ebookRoyalty" value="0" inputmode="decimal">
+              </div>
+              <div>
+                <label>KU Royalty Override $</label>
+                <input type="number" step="0.01" name="kuRoyalty" id="qm-kuRoyalty" placeholder="optional" inputmode="decimal">
+              </div>
+              <div>
+                <label>Print Royalty $</label>
+                <input type="number" step="0.01" name="printRoyalty" id="qm-printRoyalty" value="0" inputmode="decimal">
+              </div>
+              <div class="full">
+                <label>Notes</label>
+                <textarea name="notes" id="qm-notes" placeholder="Promo week, ad test, launch month, etc."></textarea>
+              </div>
+            </div>
+            <div class="form-actions">
+              <button type="button" onclick="clearQuickMetricForm()">Clear</button>
+              <button class="primary" type="submit">Save Metric</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="card span-12">
+          <h2>Saved Metrics</h2>
+          <div class="table-wrap"><table id="metrics-table"></table></div>
+        </div>
       </div>
     </section>
-
 
     <section id="backup" class="views">
       <div class="dashboard-grid grid">
@@ -429,9 +487,9 @@
           <h2>Google Drive Backup</h2>
           <p class="muted">Create one ZIP file that contains your full restore backup, CSV exports, a receipt manifest, and receipt files organized into folders. Your private data stays in your browser and backups — not in GitHub.</p>
           <div class="stack">
-            <button class="primary" onclick="exportGoogleDriveZip(true)">Share / Save Google Drive Backup ZIP</button>
-            <button onclick="exportGoogleDriveZip(false)">Download Backup ZIP</button>
-            <button onclick="exportData()">Download Restore JSON Only</button>
+            <button class="primary" data-action="drive-backup-share">Share / Save Google Drive Backup ZIP</button>
+            <button data-action="drive-backup-download">Download Backup ZIP</button>
+            <button data-action="export-json">Download Restore JSON Only</button>
             <label class="btn" for="import-file-backup">Import Restore JSON</label>
             <input id="import-file-backup" type="file" accept="application/json" style="display:none" onchange="importData(event)">
           </div>
@@ -478,8 +536,8 @@
         <h2>Settings</h2>
         <div id="settings-list"></div>
         <div class="form-actions">
-          <button class="primary" onclick="saveSettingsFromForm()">Save settings</button>
-          <button class="danger" onclick="resetDemoData()">Reset demo data</button>
+          <button class="primary" data-action="save-settings">Save settings</button>
+          <button class="danger" data-action="reset-demo">Reset demo data</button>
         </div>
       </div>
     </section>
@@ -489,7 +547,7 @@
     <div class="modal" role="dialog" aria-modal="true">
       <div class="modal-header">
         <h2 id="modal-title">Add</h2>
-        <button class="small ghost" onclick="closeModal()">✕</button>
+        <button class="small ghost" data-action="close-modal">✕</button>
       </div>
       <div id="modal-body"></div>
     </div>
@@ -629,6 +687,7 @@ function render(){
   renderMoney();
   renderReceipts();
   renderMetrics();
+  renderQuickMetricForm();
   renderBackup();
   renderSettings();
 }
@@ -676,13 +735,13 @@ function renderDashboard(){
 function taskHTML(t){
   const book = titleById(t.bookId);
   return `<div class="task-item ${t.done?'done':''}">
-    <input type="checkbox" ${t.done?'checked':''} onchange="toggleTask('${t.id}')">
+    <input type="checkbox" ${t.done?'checked':''} data-task-toggle="${t.id}">
     <div style="flex:1">
       <div class="row between">
         <div class="task-title">${escapeHTML(t.name)}</div>
         <div class="actions">
-          <button class="small" onclick="editItem('task','${t.id}')">Edit</button>
-          <button class="small danger" onclick="deleteItem('task','${t.id}')">Delete</button>
+          <button class="small" data-action="edit-task" data-id="${t.id}">Edit</button>
+          <button class="small danger" data-action="delete-task" data-id="${t.id}">Delete</button>
         </div>
       </div>
       <div class="task-meta">${dateFmt(t.dueDate)} • ${escapeHTML(t.category||"Task")} ${book?`• ${escapeHTML(book)}`:""} ${t.repeat&&t.repeat!=="None"?`• repeats ${escapeHTML(t.repeat)}`:""}</div>
@@ -698,7 +757,7 @@ function bookMiniHTML(b){
       <div class="book-sub">${escapeHTML(b.series)} • ${escapeHTML(b.type)} • ${escapeHTML(b.status)}</div>
       <div class="footer-note">${dateFmt(b.releaseDate)} ${days>=0?`• ${days} days away`:"• date passed"}</div>
     </div>
-    <div class="actions"><button class="small" onclick="editItem('book','${b.id}')">Edit</button></div>
+    <div class="actions"><button class="small" data-action="edit-book" data-id="${b.id}">Edit</button></div>
   </div>`;
 }
 function renderWeek(){
@@ -728,9 +787,9 @@ function renderBooks(){
         ${b.notes?`<div class="footer-note">${escapeHTML(b.notes)}</div>`:""}
       </div>
       <div class="actions">
-        <button class="small" onclick="openModal('metric', null, '${b.id}')">Add metric</button>
-        <button class="small" onclick="editItem('book','${b.id}')">Edit</button>
-        <button class="small danger" onclick="deleteItem('book','${b.id}')">Delete</button>
+        <button class="small" data-action="add-metric-book" data-id="${b.id}">Add metric</button>
+        <button class="small" data-action="edit-book" data-id="${b.id}">Edit</button>
+        <button class="small danger" data-action="delete-book" data-id="${b.id}">Delete</button>
       </div>
     </div>`
   }).join("") : `<div class="empty">No books added yet.</div>`;
@@ -752,7 +811,7 @@ function renderMoney(){
       <td>${e.businessPct}%</td>
       <td>${money2(deductible(e))}</td>
       <td>${e.receiptData||e.receiptName?'<span class="pill green">Attached</span>':'<span class="pill red">Missing</span>'}</td>
-      <td><button class="small" onclick="editItem('expense','${e.id}')">Edit</button></td>
+      <td><button class="small" data-action="edit-expense" data-id="${e.id}">Edit</button></td>
     </tr>`).join("");
   document.getElementById("expenses-table").innerHTML = `<thead><tr><th>Date</th><th>Vendor</th><th>Category</th><th>Amount</th><th>Business %</th><th>Deductible</th><th>Receipt</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="8" class="muted">No expenses yet.</td></tr>'}</tbody>`;
 }
@@ -778,13 +837,84 @@ function renderReceipts(){
         </div>
       </div>
       <div class="actions">
-        ${e.receiptData?`<button class="small" onclick="downloadReceipt('${e.id}')">Open/Save</button>`:""}
-        <button class="small" onclick="editItem('expense','${e.id}')">Edit</button>
+        ${e.receiptData?`<button class="small" data-action="download-receipt" data-id="${e.id}">Open/Save</button>`:""}
+        <button class="small" data-action="edit-expense" data-id="${e.id}">Edit</button>
       </div>
     </div>`;
   }).join("");
   list.innerHTML = rows || `<div class="empty">No receipts or expenses yet.</div>`;
 }
+
+function renderQuickMetricForm(){
+  const form = document.getElementById("quick-metric-form");
+  const noBooks = document.getElementById("quick-metric-no-books");
+  const select = document.getElementById("qm-bookId");
+  const month = document.getElementById("qm-month");
+  if(!form || !select) return;
+  if(month && !month.value) month.value = currentMonthKey();
+  const books = state.books || [];
+  select.innerHTML = books.map(b=>`<option value="${b.id}">${escapeHTML(b.title || "Untitled Book")}</option>`).join("");
+  const disabled = books.length === 0;
+  form.style.display = disabled ? "none" : "block";
+  if(noBooks) noBooks.style.display = disabled ? "block" : "none";
+}
+
+function clearQuickMetricForm(){
+  const form = document.getElementById("quick-metric-form");
+  if(!form) return;
+  form.reset();
+  const month = document.getElementById("qm-month");
+  if(month) month.value = currentMonthKey();
+  showToast("Metric form cleared.");
+}
+
+function saveQuickMetric(e){
+  e.preventDefault();
+  try{
+    const f = new FormData(e.target);
+    const bookId = f.get("bookId");
+    if(!bookId){
+      showToast("Add or choose a book first.");
+      return;
+    }
+    const obj = {
+      id: uid("M"),
+      month: f.get("month") || currentMonthKey(),
+      bookId: bookId,
+      ebookSales: Number(f.get("ebookSales") || 0),
+      kuPages: Number(f.get("kuPages") || 0),
+      printSales: Number(f.get("printSales") || 0),
+      ebookRoyalty: Number(f.get("ebookRoyalty") || 0),
+      kuRoyalty: f.get("kuRoyalty") || "",
+      printRoyalty: Number(f.get("printRoyalty") || 0),
+      notes: f.get("notes") || ""
+    };
+    state.metrics.push(obj);
+    saveState();
+    clearQuickMetricForm();
+    render();
+    showToast("Metric saved.");
+  }catch(err){
+    console.error(err);
+    alert("Metric could not be saved. Please export a backup and refresh the app.");
+  }
+}
+
+function openMetricSafely(){
+  try{
+    if(!state.books || state.books.length === 0){
+      showToast("Add a book first, then add monthly metrics.");
+      openModal("book");
+      return;
+    }
+    openModal("metric");
+  }catch(err){
+    console.error(err);
+    alert("The popup metric form could not open. Use the Quick Add Metric form on this page instead.");
+  }
+}
+
+
 function renderMetrics(){
   const rows = state.metrics.slice().sort((a,b)=>(b.month||"").localeCompare(a.month||"")).map(m=>{
     const c = calcMetric(m);
@@ -801,7 +931,7 @@ function renderMetrics(){
       <td>${num(c.actions)}</td>
       <td class="${gap>=0?'good':'bad'}">${gap>=0?'+':''}${num(gap)}</td>
       <td>${money2(c.gross)}</td>
-      <td><button class="small" onclick="editItem('metric','${m.id}')">Edit</button></td>
+      <td><button class="small" data-action="edit-metric" data-id="${m.id}">Edit</button></td>
     </tr>`;
   }).join("");
   document.getElementById("metrics-table").innerHTML = `<thead><tr><th>Month</th><th>Book</th><th>Ebook</th><th>KU Pages</th><th>KU Reads</th><th>Print</th><th>Actions</th><th>Gap</th><th>Gross</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="10" class="muted">No metrics yet. Add your monthly KDP numbers when books are live.</td></tr>'}</tbody>`;
@@ -833,7 +963,14 @@ function saveSettingsFromForm(){
   saveState(); render(); showToast("Settings saved.");
 }
 
+
+
 function openModal(type, item=null, preselectBookId=""){
+  if(type === "metric" && !item && !preselectBookId && (!state.books || state.books.length === 0)){
+    showToast("Add a book first, then add monthly metrics.");
+    openModal("book");
+    return;
+  }
   currentModal = type;
   editingId = item ? item.id : null;
   const title = document.getElementById("modal-title");
@@ -869,7 +1006,7 @@ function bookOptions(selected=""){
 function bookForm(b={}){
   const seriesOptions = ["Series 1","Series 2","Series 3","Standalone","Other"];
   const visibleSeriesOptions = b.series && !seriesOptions.includes(b.series) ? [b.series, ...seriesOptions] : seriesOptions;
-  return `<form onsubmit="saveBook(event)">
+  return `<form data-form="book">
     <div class="form-grid">
       <div class="full"><label>Title</label><input name="title" required value="${attr(b.title)}"></div>
       <div><label>Series</label><select name="series">
@@ -889,11 +1026,11 @@ function bookForm(b={}){
       <div><label>Current word count</label><input type="number" name="currentWords" value="${b.currentWords??0}"></div>
       <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(b.notes||"")}</textarea></div>
     </div>
-    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Book</button></div>
+    <div class="form-actions"><button type="button" data-action="close-modal">Cancel</button><button class="primary" type="submit">Save Book</button></div>
   </form>`;
 }
 function taskForm(t={}){
-  return `<form onsubmit="saveTask(event)">
+  return `<form data-form="task">
     <div class="form-grid">
       <div class="full"><label>Task name</label><input name="name" required value="${attr(t.name)}"></div>
       <div><label>Category</label><select name="category">
@@ -916,11 +1053,11 @@ function taskForm(t={}){
       </select></div>
       <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(t.notes||"")}</textarea></div>
     </div>
-    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Task</button></div>
+    <div class="form-actions"><button type="button" data-action="close-modal">Cancel</button><button class="primary" type="submit">Save Task</button></div>
   </form>`;
 }
 function expenseForm(e={}){
-  return `<form onsubmit="saveExpense(event)">
+  return `<form data-form="expense">
     <div class="form-grid">
       <div><label>Date</label><input type="date" name="date" value="${attr(e.date||todayISO())}"></div>
       <div><label>Vendor</label><input name="vendor" required value="${attr(e.vendor)}"></div>
@@ -937,12 +1074,12 @@ function expenseForm(e={}){
       <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(e.notes||"")}</textarea></div>
       ${e.receiptName?`<div class="full footer-note">Current receipt: ${escapeHTML(e.receiptName)}</div>`:""}
     </div>
-    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Expense</button></div>
+    <div class="form-actions"><button type="button" data-action="close-modal">Cancel</button><button class="primary" type="submit">Save Expense</button></div>
   </form>`;
 }
 function metricForm(m={}, preselectBookId=""){
   const selected = m.bookId || preselectBookId || "";
-  return `<form onsubmit="saveMetric(event)">
+  return `<form data-form="metric">
     <div class="form-grid">
       <div><label>Month</label><input type="month" name="month" value="${attr((m.month||currentMonthKey()).slice(0,7))}"></div>
       <div><label>Book</label><select name="bookId" required>${bookOptions(selected)}</select></div>
@@ -954,7 +1091,7 @@ function metricForm(m={}, preselectBookId=""){
       <div><label>Print royalty</label><input type="number" step="0.01" name="printRoyalty" value="${m.printRoyalty??0}"></div>
       <div class="full"><label>Notes</label><textarea name="notes">${escapeHTML(m.notes||"")}</textarea></div>
     </div>
-    <div class="form-actions"><button type="button" onclick="closeModal()">Cancel</button><button class="primary" type="submit">Save Metric</button></div>
+    <div class="form-actions"><button type="button" data-action="close-modal">Cancel</button><button class="primary" type="submit">Save Metric</button></div>
   </form>`;
 }
 
@@ -1283,9 +1420,12 @@ function escapeHTML(s=""){
 function attr(s=""){return escapeHTML(s)}
 render();
 
-if("serviceWorker" in navigator && location.protocol !== "file:"){
-  window.addEventListener("load", ()=>navigator.serviceWorker.register("./service-worker.js").catch(()=>{}));
+
+// v6 debugging choice: unregister old service workers so GitHub Pages does not keep serving stale cached copies.
+if("serviceWorker" in navigator){
+  navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(reg => reg.unregister())).catch(()=>{});
 }
+
 </script>
 </body>
 </html>
