@@ -1,15 +1,23 @@
-Author Command Center v6 — Metric Quick Add Fix
+Author Command Center v7 — Task Button Fix
 
-This version fixes the metric issue by adding a built-in Quick Add Metric form directly on the Metrics page.
+Fixes:
+- Add Task, Edit Task, and Delete Task now use delegated mobile-safe click handling.
+- Save Task now uses delegated form submit handling.
+- Checkbox task completion remains supported.
+- The same handler also supports Book, Expense, Metric, Backup, Settings, and Receipt buttons.
+- Header shows v7 so you can confirm you are on the newest version.
 
-Upload instructions:
-1. Delete or overwrite the old GitHub files with these files.
-2. Commit changes.
-3. Open your Pages URL with ?v=6 at the end, for example:
-   https://YOURNAME.github.io/author-command-center/?v=6
+Upload:
+1. Unzip this package.
+2. Upload/replace all files in your GitHub repository root.
+3. Commit changes.
+4. Open your GitHub Pages URL with ?v=7:
+   https://YOURUSERNAME.github.io/author-command-center/?v=7
 
-Important:
-- v6 intentionally unregisters old service workers to stop stale cached versions.
-- If your iPhone Home Screen icon still opens the old app, delete that icon and add the ?v=6 URL to Home Screen again.
-- After opening v6, import your private JSON from Backup > Import Restore JSON.
-- The Metrics page now has a Quick Add form that should work even if the popup button fails.
+If your Home Screen icon opens the old version:
+- Delete the old icon.
+- Open the ?v=7 link in Safari/Chrome.
+- Add it to Home Screen again.
+
+If you already imported data:
+- Your data should stay in browser storage, but export a backup before replacing files when possible.

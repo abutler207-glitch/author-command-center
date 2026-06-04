@@ -248,7 +248,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v6</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v7</div>
         </div>
       </div>
       <div class="toolbar">
@@ -426,7 +426,7 @@
           <h2>Quick Add Metric</h2>
           <div id="quick-metric-no-books" class="empty" style="display:none">
             Add or import at least one book first. Then this metric form will activate.
-            <div style="margin-top:12px"><button class="primary" type="button" onclick="openModal('book')">+ Add Book</button></div>
+            <div style="margin-top:12px"><button class="primary" type="button" data-action="add-book">+ Add Book</button></div>
           </div>
           <form id="quick-metric-form" onsubmit="saveQuickMetric(event)" style="padding:0">
             <div class="form-grid">
@@ -1421,7 +1421,73 @@ function attr(s=""){return escapeHTML(s)}
 render();
 
 
-// v6 debugging choice: unregister old service workers so GitHub Pages does not keep serving stale cached copies.
+
+function handleAction(action, id, btn){
+  switch(action){
+    case "add-task": openModal("task"); break;
+    case "add-expense": openModal("expense"); break;
+    case "add-book": openModal("book"); break;
+    case "export-json": exportData(); break;
+    case "drive-backup-share": exportGoogleDriveZip(true); break;
+    case "drive-backup-download": exportGoogleDriveZip(false); break;
+    case "generate-recurring": generateRecurringTasks(); break;
+    case "close-modal": closeModal(); break;
+    case "save-settings": saveSettingsFromForm(); break;
+    case "reset-demo": resetDemoData(); break;
+    case "edit-task": editItem("task", id); break;
+    case "delete-task": deleteItem("task", id); break;
+    case "edit-book": editItem("book", id); break;
+    case "delete-book": deleteItem("book", id); break;
+    case "add-metric-book": openModal("metric", null, id); break;
+    case "edit-expense": editItem("expense", id); break;
+    case "edit-metric": editItem("metric", id); break;
+    case "download-receipt": downloadReceipt(id); break;
+    default:
+      console.warn("Unknown action:", action);
+      showToast("Action not recognized: " + action);
+  }
+}
+
+document.addEventListener("click", function(e){
+  const btn = e.target.closest("[data-action]");
+  if(!btn) return;
+  e.preventDefault();
+  e.stopPropagation();
+  const action = btn.getAttribute("data-action");
+  const id = btn.getAttribute("data-id") || "";
+  try{
+    handleAction(action, id, btn);
+  }catch(err){
+    console.error(err);
+    alert("That button hit an error. Action: " + action + "\\n" + (err && err.message ? err.message : err));
+  }
+}, true);
+
+document.addEventListener("change", function(e){
+  const toggle = e.target.closest("[data-task-toggle]");
+  if(toggle){
+    const id = toggle.getAttribute("data-task-toggle");
+    try{ toggleTask(id); }catch(err){ console.error(err); alert("Could not update task."); }
+  }
+});
+
+document.addEventListener("submit", function(e){
+  const form = e.target.closest("form[data-form]");
+  if(!form) return;
+  e.preventDefault();
+  const type = form.getAttribute("data-form");
+  try{
+    if(type === "book") saveBook(e);
+    else if(type === "task") saveTask(e);
+    else if(type === "expense") saveExpense(e);
+    else if(type === "metric") saveMetric(e);
+  }catch(err){
+    console.error(err);
+    alert("Could not save " + type + ". " + (err && err.message ? err.message : err));
+  }
+}, true);
+
+// v7 debugging choice: unregister old service workers so GitHub Pages does not keep serving stale cached copies.
 if("serviceWorker" in navigator){
   navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(reg => reg.unregister())).catch(()=>{});
 }
