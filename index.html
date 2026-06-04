@@ -656,6 +656,36 @@
       #marketing .card.metric .note { font-size: 11px !important; }
     }
 
+  
+    /* v22 marketing campaign modal visibility fix */
+    .modal {
+      display: flex;
+      flex-direction: column;
+    }
+    #modal-body {
+      display: block;
+      flex: 1 1 auto;
+      min-height: 80px;
+    }
+    @media(max-width:520px){
+      .modal {
+        max-height: 86vh;
+      }
+      #modal-body form {
+        padding-bottom: 22px;
+      }
+    }
+
+  
+    /* v23: frequent tabs moved forward in horizontal tab rail */
+    @media(max-width:520px){
+      nav.tabs .tab[data-view="marketing"],
+      nav.tabs .tab[data-view="metrics"],
+      nav.tabs .tab[data-view="receipts"] {
+        font-weight: 800;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -665,7 +695,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v21</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v24</div>
         </div>
       </div>
       <div class="toolbar">
@@ -684,12 +714,12 @@
     <nav class="tabs" aria-label="App sections">
       <button class="tab active" data-view="dashboard">Dashboard</button>
       <button class="tab" data-view="week">This Week</button>
-      <button class="tab" data-view="books">Books</button>
-      <button class="tab" data-view="money">Money</button>
-      <button class="tab" data-view="receipts">Receipts</button>
-      <button class="tab" data-view="metrics">Metrics</button>
-      <button class="tab" data-view="trends">Trends</button>
       <button class="tab" data-view="marketing">Marketing</button>
+      <button class="tab" data-view="metrics">Metrics</button>
+      <button class="tab" data-view="receipts">Receipts</button>
+      <button class="tab" data-view="money">Money</button>
+      <button class="tab" data-view="trends">Trends</button>
+      <button class="tab" data-view="books">Books</button>
       <button class="tab" data-view="backup">Backup</button>
       <button class="tab" data-view="settings">Settings</button>
     </nav>
@@ -1636,7 +1666,8 @@ function openMetricUpdateHub(){
       </div>
       <div class="form-actions"><button type="button" data-action="close-modal">Close</button></div>
     </div>`;
-    document.getElementById("modal-backdrop").classList.add("active");
+    if(type==="campaign") body.innerHTML = campaignForm(item);
+  document.getElementById("modal-backdrop").classList.add("active");
   }catch(err){
     console.error(err);
     alert("Could not open metric updater. " + (err && err.message ? err.message : err));
