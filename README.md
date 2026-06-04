@@ -1,23 +1,18 @@
-Author Command Center v7 — Task Button Fix
+Author Command Center v8 — Task Add/Edit Null Fix
 
 Fixes:
-- Add Task, Edit Task, and Delete Task now use delegated mobile-safe click handling.
-- Save Task now uses delegated form submit handling.
-- Checkbox task completion remains supported.
-- The same handler also supports Book, Expense, Metric, Backup, Settings, and Receipt buttons.
-- Header shows v7 so you can confirm you are on the newest version.
+- Add Task now opens the form instead of throwing: null is not an object (evaluating 't.name').
+- Add/Edit Book, Expense, Task, and Metric forms now safely handle empty/new records.
+- Header should show v8.
 
 Upload:
 1. Unzip this package.
-2. Upload/replace all files in your GitHub repository root.
+2. Upload/overwrite all files in the GitHub repository root.
 3. Commit changes.
-4. Open your GitHub Pages URL with ?v=7:
-   https://YOURUSERNAME.github.io/author-command-center/?v=7
+4. Open your GitHub Pages link with ?v=8:
+   https://YOURUSERNAME.github.io/author-command-center/?v=8
 
-If your Home Screen icon opens the old version:
-- Delete the old icon.
-- Open the ?v=7 link in Safari/Chrome.
-- Add it to Home Screen again.
-
-If you already imported data:
-- Your data should stay in browser storage, but export a backup before replacing files when possible.
+If your phone still shows an old version:
+- Reload the ?v=8 link.
+- Delete and re-add the Home Screen icon.
+- In the browser menu, open a new/private tab and load ?v=8.

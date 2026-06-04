@@ -1,3 +1,4 @@
+<!-- Author Command Center v8 Task Add/Edit Null Fix -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -248,7 +249,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v7</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v8</div>
         </div>
       </div>
       <div class="toolbar">
@@ -976,10 +977,11 @@ function openModal(type, item=null, preselectBookId=""){
   const title = document.getElementById("modal-title");
   const body = document.getElementById("modal-body");
   title.textContent = `${editingId?'Edit':'Add'} ${type[0].toUpperCase()+type.slice(1)}`;
-  if(type==="book") body.innerHTML = bookForm(item);
-  if(type==="task") body.innerHTML = taskForm(item);
-  if(type==="expense") body.innerHTML = expenseForm(item);
-  if(type==="metric") body.innerHTML = metricForm(item, preselectBookId);
+  const formItem = item || {};
+  if(type==="book") body.innerHTML = bookForm(formItem);
+  if(type==="task") body.innerHTML = taskForm(formItem);
+  if(type==="expense") body.innerHTML = expenseForm(formItem);
+  if(type==="metric") body.innerHTML = metricForm(formItem, preselectBookId);
   document.getElementById("modal-backdrop").classList.add("active");
 }
 function closeModal(){
@@ -1004,6 +1006,7 @@ function bookOptions(selected=""){
   return `<option value="">—</option>` + state.books.map(b=>`<option value="${b.id}" ${b.id===selected?'selected':''}>${escapeHTML(b.title)}</option>`).join("");
 }
 function bookForm(b={}){
+  b = b || {};
   const seriesOptions = ["Series 1","Series 2","Series 3","Standalone","Other"];
   const visibleSeriesOptions = b.series && !seriesOptions.includes(b.series) ? [b.series, ...seriesOptions] : seriesOptions;
   return `<form data-form="book">
@@ -1030,6 +1033,7 @@ function bookForm(b={}){
   </form>`;
 }
 function taskForm(t={}){
+  t = t || {};
   return `<form data-form="task">
     <div class="form-grid">
       <div class="full"><label>Task name</label><input name="name" required value="${attr(t.name)}"></div>
@@ -1057,6 +1061,7 @@ function taskForm(t={}){
   </form>`;
 }
 function expenseForm(e={}){
+  e = e || {};
   return `<form data-form="expense">
     <div class="form-grid">
       <div><label>Date</label><input type="date" name="date" value="${attr(e.date||todayISO())}"></div>
@@ -1078,6 +1083,7 @@ function expenseForm(e={}){
   </form>`;
 }
 function metricForm(m={}, preselectBookId=""){
+  m = m || {};
   const selected = m.bookId || preselectBookId || "";
   return `<form data-form="metric">
     <div class="form-grid">
@@ -1487,7 +1493,7 @@ document.addEventListener("submit", function(e){
   }
 }, true);
 
-// v7 debugging choice: unregister old service workers so GitHub Pages does not keep serving stale cached copies.
+// v8 debugging choice: unregister old service workers so GitHub Pages does not keep serving stale cached copies.
 if("serviceWorker" in navigator){
   navigator.serviceWorker.getRegistrations().then(regs => regs.forEach(reg => reg.unregister())).catch(()=>{});
 }
