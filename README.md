@@ -1,22 +1,24 @@
-Author Command Center v30 — Backup Naming + Receipt Preview
+Author Command Center v31 — Multi-Page PDF Receipt Preview
 
 What's new:
-- Backup export filenames now include app version and export date.
-  Example: Author_Command_Center_Backup_v30_2026-06-03.zip
-- Restore JSON export filenames now include app version and export date.
-  Example: Author_Command_Center_Restore_v30_2026-06-03.json
-- Receipt Vault now has a Preview button for attached receipts.
-- Image receipts open in a larger preview modal.
-- PDF receipts attempt to open in an embedded preview with Open/Save fallback.
-- Header shows v30 after deployment.
+- PDF receipt preview now attempts to render every page, not just the first page.
+- Multi-page PDFs display as scrollable page canvases inside the preview modal.
+- Image receipt preview still works as before.
+- Open/Save remains as fallback if the browser cannot render the PDF.
+- Backup filenames still include app version and export date.
+- Header shows v31 after deployment.
+
+Note:
+- Multi-page PDF preview uses PDF.js from a CDN, so it needs internet access the first time it loads.
+- If a PDF is very large, rendering may take a few seconds on phone.
 
 Deploy:
 1. Upload/overwrite all files in your GitHub repository with this folder's contents.
 2. Commit changes.
-3. Open your GitHub Pages URL with ?v=30:
-   https://YOURUSERNAME.github.io/author-command-center/?v=30
+3. Open your GitHub Pages URL with ?v=31:
+   https://YOURUSERNAME.github.io/author-command-center/?v=31
 
-If your phone still shows the old backup filename or no receipt preview:
+If your phone still shows the old receipt preview:
 - Delete the old Home Screen icon.
-- Open the ?v=30 URL.
-- Add the ?v=30 page to Home Screen again.
+- Open the ?v=31 URL.
+- Add the ?v=31 page to Home Screen again.
