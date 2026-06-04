@@ -327,6 +327,53 @@
       }
     }
 
+  
+    /* v11 chart compaction: reduce empty canvas space on mobile */
+    .chart-card {
+      padding-bottom: 12px;
+    }
+    .chart-card h2 {
+      margin-bottom: 8px;
+    }
+    .chart-card canvas {
+      height: auto;
+      max-height: 210px !important;
+      margin-top: 2px;
+      margin-bottom: 4px;
+    }
+    .chart-card .footer-note {
+      margin-top: 4px;
+    }
+    @media(max-width:520px){
+      .chart-card {
+        padding-top: 14px;
+        padding-bottom: 12px;
+      }
+      .chart-card canvas {
+        max-height: 180px !important;
+      }
+      #actionMixChart,
+      #actionsGoalChart {
+        max-height: 165px !important;
+      }
+    }
+
+  
+    /* v12 top Home button */
+    .home-btn {
+      border-color: rgba(201,168,106,.55) !important;
+      background: rgba(201,168,106,.10) !important;
+      color: #ffe5a8 !important;
+    }
+    .home-btn:hover {
+      background: rgba(201,168,106,.18) !important;
+    }
+    @media(max-width:520px){
+      .toolbar .home-btn {
+        order: -1;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -336,7 +383,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v10</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v12</div>
         </div>
       </div>
       <div class="toolbar">
@@ -594,20 +641,20 @@
           <div class="note">Current month × 12</div>
         </div>
 
-        <div class="card span-8">
+        <div class="card span-8 chart-card">
           <h2>Gross royalty trend</h2>
-          <canvas id="grossTrendChart" height="260"></canvas>
+          <canvas id="grossTrendChart" height="180"></canvas>
           <div class="footer-note">Shows total gross from metrics entered by month.</div>
         </div>
-        <div class="card span-4">
+        <div class="card span-4 chart-card">
           <h2>Reader action mix</h2>
-          <canvas id="actionMixChart" height="260"></canvas>
+          <canvas id="actionMixChart" height="170"></canvas>
           <div class="footer-note">Current month split: ebook sales, KU full-read equivalents, and print sales.</div>
         </div>
 
-        <div class="card span-6">
+        <div class="card span-6 chart-card">
           <h2>Reader actions vs goal</h2>
-          <canvas id="actionsGoalChart" height="250"></canvas>
+          <canvas id="actionsGoalChart" height="170"></canvas>
           <div class="footer-note">Current month total actions versus live-book goal.</div>
         </div>
         <div class="card span-6">
@@ -786,6 +833,18 @@ function bookById(id){return state.books.find(b=>b.id===id)}
 function titleById(id){const b=bookById(id); return b?b.title:""}
 function publishedBooks(){return state.books.filter(b=>b.status==="Published")}
 function bookActionGoal(b){return Number(b.goal || state.settings.defaultReaderActionGoal || 100)}
+
+
+function goHome(){
+  document.querySelectorAll(".tab").forEach(b=>b.classList.remove("active"));
+  document.querySelectorAll(".views").forEach(v=>v.classList.remove("active"));
+  const dashTab = document.querySelector('.tab[data-view="dashboard"]');
+  const dashView = document.getElementById("dashboard");
+  if(dashTab) dashTab.classList.add("active");
+  if(dashView) dashView.classList.add("active");
+  window.scrollTo({top:0, behavior:"smooth"});
+  render();
+}
 
 document.querySelectorAll(".tab").forEach(btn=>{
   btn.addEventListener("click", ()=>{
@@ -1121,12 +1180,13 @@ function canvasSetup(canvas){
   const ctx = canvas.getContext("2d");
   const rect = canvas.getBoundingClientRect();
   const ratio = window.devicePixelRatio || 1;
-  const w = Math.max(300, rect.width || canvas.clientWidth || 300);
-  const h = Number(canvas.getAttribute("height")) || 260;
+  const w = Math.max(280, rect.width || canvas.clientWidth || 300);
+  const attrH = Number(canvas.getAttribute("height")) || 180;
+  const h = Math.min(attrH, window.innerWidth <= 520 ? 180 : 220);
   canvas.width = w * ratio;
   canvas.height = h * ratio;
-  canvas.style.width = w + "px";
-  canvas.style.height = h + "px";
+  canvas.style.setProperty("width", "100%", "important");
+  canvas.style.setProperty("height", h + "px", "important");
   ctx.setTransform(ratio,0,0,ratio,0,0);
   return {ctx,w,h};
 }
@@ -1149,7 +1209,7 @@ function drawLineChart(canvas, labels, values, prefix="$"){
   if(!values.length){ drawEmptyChart(canvas, "No data yet"); return; }
   const {ctx,w,h} = canvasSetup(canvas);
   const c = chartColors();
-  const pad = {l:44,r:18,t:22,b:44};
+  const pad = {l:44,r:18,t:16,b:34};
   const max = Math.max(...values, 1);
   const min = 0;
   ctx.clearRect(0,0,w,h);
@@ -1183,7 +1243,10 @@ function drawDonutChart(canvas, labels, values){
   const colors = chartColors();
   const palette = [colors.accent, colors.blue, colors.green, colors.warn];
   ctx.clearRect(0,0,w,h);
-  const cx = w/2, cy = h/2-18, r = Math.min(w,h)*0.26, inner = r*0.58;
+  const cx = w/2;
+  const cy = 60;
+  const r = Math.min(w*0.20, 46);
+  const inner = r*0.58;
   let a = -Math.PI/2;
   values.forEach((v,i)=>{
     const next = a + (v/total)*Math.PI*2;
@@ -1191,12 +1254,12 @@ function drawDonutChart(canvas, labels, values){
     ctx.fillStyle = palette[i%palette.length]; ctx.fill(); a = next;
   });
   ctx.beginPath(); ctx.arc(cx,cy,inner,0,Math.PI*2); ctx.fillStyle="#151922"; ctx.fill();
-  ctx.fillStyle = colors.text; ctx.font = "bold 18px system-ui"; ctx.textAlign = "center"; ctx.fillText(num(total), cx, cy+6);
-  let y = h-54;
+  ctx.fillStyle = colors.text; ctx.font = "bold 16px system-ui"; ctx.textAlign = "center"; ctx.fillText(num(total), cx, cy+5);
+  const legendY = cy + r + 26;
   labels.forEach((lab,i)=>{
     const x = 24 + (i%2)*(w/2);
-    const yy = y + Math.floor(i/2)*24;
-    ctx.fillStyle = palette[i%palette.length]; ctx.fillRect(x, yy-10, 12, 12);
+    const yy = legendY + Math.floor(i/2)*22;
+    ctx.fillStyle = palette[i%palette.length]; ctx.fillRect(x, yy-10, 11, 11);
     ctx.fillStyle = colors.muted; ctx.font = "12px system-ui"; ctx.textAlign = "left";
     ctx.fillText(`${lab}: ${num(values[i])}`, x+18, yy);
   });
@@ -1211,14 +1274,17 @@ function drawBarCompare(canvas, actual, goal){
     {label:"Actual", val:actual, color:c.accent},
     {label:"Goal", val:goal, color:c.blue}
   ];
-  const padL=80, padR=24, barH=42, startY=68;
+  const padL = window.innerWidth <= 520 ? 64 : 80;
+  const padR = 16;
+  const barH = window.innerWidth <= 520 ? 30 : 36;
+  const startY = 34;
   ctx.font = "13px system-ui";
   bars.forEach((b,i)=>{
-    const y = startY + i*72;
-    ctx.fillStyle = c.muted; ctx.textAlign="right"; ctx.fillText(b.label, padL-12, y+27);
+    const y = startY + i*(barH+22);
+    ctx.fillStyle = c.muted; ctx.textAlign="right"; ctx.fillText(b.label, padL-10, y+barH/2+5);
     ctx.strokeStyle = c.line; ctx.strokeRect(padL, y, w-padL-padR, barH);
     ctx.fillStyle = b.color; ctx.fillRect(padL, y, (w-padL-padR)*(b.val/max), barH);
-    ctx.fillStyle = c.text; ctx.textAlign="left"; ctx.font = "bold 14px system-ui"; ctx.fillText(num(b.val), padL+8, y+27);
+    ctx.fillStyle = c.text; ctx.textAlign="left"; ctx.font = "bold 14px system-ui"; ctx.fillText(num(b.val), padL+8, y+barH/2+5);
   });
 }
 function renderTrends(){
