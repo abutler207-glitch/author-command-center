@@ -686,6 +686,26 @@
       }
     }
 
+  
+    /* v25 campaign modal loading fix */
+    .modal {
+      display: flex;
+      flex-direction: column;
+    }
+    #modal-body {
+      display: block;
+      flex: 1 1 auto;
+      min-height: 80px;
+    }
+    @media(max-width:520px){
+      .modal {
+        max-height: 86vh;
+      }
+      #modal-body form {
+        padding-bottom: 22px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -695,7 +715,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v24</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v25</div>
         </div>
       </div>
       <div class="toolbar">
@@ -1666,8 +1686,7 @@ function openMetricUpdateHub(){
       </div>
       <div class="form-actions"><button type="button" data-action="close-modal">Close</button></div>
     </div>`;
-    if(type==="campaign") body.innerHTML = campaignForm(item);
-  document.getElementById("modal-backdrop").classList.add("active");
+    document.getElementById("modal-backdrop").classList.add("active");
   }catch(err){
     console.error(err);
     alert("Could not open metric updater. " + (err && err.message ? err.message : err));
@@ -2147,6 +2166,10 @@ function openModal(type, item=null, preselectBookId=""){
   if(type==="task") body.innerHTML = taskForm(formItem);
   if(type==="expense") body.innerHTML = expenseForm(formItem);
   if(type==="metric") body.innerHTML = metricForm(formItem, preselectBookId);
+  if(type==="campaign") body.innerHTML = campaignForm(formItem);
+  if(!body.innerHTML.trim()){
+    body.innerHTML = `<div style="padding:16px"><div class="empty">No form loaded for ${escapeHTML(type)}. Please update the app version or try again.</div><div class="form-actions"><button type="button" data-action="close-modal">Close</button></div></div>`;
+  }
   document.getElementById("modal-backdrop").classList.add("active");
 }
 function closeModal(){
