@@ -1,18 +1,23 @@
-Author Command Center v13 — Home Button Replacement Fix
+Author Command Center v14 — Dashboard Reorder / Focus
 
-What's fixed:
-- The top toolbar now truly replaces Export JSON with 🏠 Home.
-- Home returns to Dashboard and scrolls to the top.
-- A delegated click handler was added so the Home button works even on mobile browsers.
-- Backup/export remains available through the Backup tab and Drive Backup button.
+What's new:
+- Added Dashboard focus controls:
+  - Tasks first
+  - Release first
+  - Money first
+  - Default
+- Your chosen layout is saved locally.
+- Default behavior moves This Week and Next/Upcoming Release closer to the top.
+- Top Home button remains.
+- Header shows v14 after deployment.
 
 Deploy:
 1. Upload/overwrite all files in your GitHub repository with this folder's contents.
 2. Commit changes.
-3. Open your GitHub Pages URL with ?v=13:
-   https://YOURUSERNAME.github.io/author-command-center/?v=13
+3. Open your GitHub Pages URL with ?v=14:
+   https://YOURUSERNAME.github.io/author-command-center/?v=14
 
-If your phone still shows Export JSON:
-- Confirm your GitHub index.html says v13.
-- Open the ?v=13 URL directly.
-- Delete the old Home Screen icon and re-add the ?v=13 page.
+If your phone still shows the old layout:
+- Delete the old Home Screen icon.
+- Open the ?v=14 URL.
+- Add the ?v=14 page to Home Screen again.

@@ -388,6 +388,45 @@
       .toolbar .home-btn { order: -1; }
     }
 
+  
+    /* v14 dashboard section ordering */
+    .dashboard-layout-bar {
+      padding-top: 12px;
+      padding-bottom: 12px;
+    }
+    .dashboard-layout-row {
+      gap: 12px;
+      align-items: center;
+    }
+    .layout-buttons {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+    .layout-buttons button.primary {
+      background: var(--accent);
+      color: #141414;
+      border-color: transparent;
+    }
+    @media(max-width:520px){
+      .dashboard-layout-bar {
+        padding: 12px;
+      }
+      .dashboard-layout-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .layout-buttons {
+        width: 100%;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+      .layout-buttons button {
+        width: 100%;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -397,7 +436,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v13</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v14</div>
         </div>
       </div>
       <div class="toolbar">
@@ -427,28 +466,43 @@
 
     <section id="dashboard" class="views active">
       <div class="dashboard-grid grid">
-        <div class="card metric span-3">
+        <div class="card span-12 dashboard-layout-bar">
+          <div class="row between dashboard-layout-row">
+            <div>
+              <strong>Dashboard focus</strong>
+              <div class="footer-note">Move the sections you use most to the top.</div>
+            </div>
+            <div class="layout-buttons">
+              <button class="small" type="button" data-layout-choice="tasks">Tasks first</button>
+              <button class="small" type="button" data-layout-choice="release">Release first</button>
+              <button class="small" type="button" data-layout-choice="money">Money first</button>
+              <button class="small" type="button" data-layout-choice="default">Default</button>
+            </div>
+          </div>
+        </div>
+        
+        <div class="card metric span-3 dash-section dash-books-live-card">
           <div>
             <div class="label">Books live</div>
             <div id="dash-books-live" class="value">0</div>
           </div>
           <div class="note">Published titles only</div>
         </div>
-        <div class="card metric span-3">
+        <div class="card metric span-3 dash-section dash-gross-card">
           <div>
             <div class="label">This month gross</div>
             <div id="dash-gross" class="value">$0</div>
           </div>
           <div class="note">Ebook + KU + print estimate</div>
         </div>
-        <div class="card metric span-3">
+        <div class="card metric span-3 dash-section dash-tax-card">
           <div>
             <div class="label">Tax reserve</div>
             <div id="dash-tax" class="value">$0</div>
           </div>
           <div class="note">Based on your setting</div>
         </div>
-        <div class="card metric span-3">
+        <div class="card metric span-3 dash-section dash-actions-card">
           <div>
             <div class="label">Reader actions</div>
             <div id="dash-actions" class="value">0</div>
@@ -456,14 +510,14 @@
           <div class="note" id="dash-actions-note">0% of monthly goal</div>
         </div>
 
-        <div class="card span-7">
+        <div class="card span-7 dash-section dash-week-card">
           <div class="row between">
             <h2>This Week</h2>
             <button class="small" data-action="add-task">Add task</button>
           </div>
           <div id="dash-week-list" class="stack"></div>
         </div>
-        <div class="card span-5">
+        <div class="card span-5 dash-section dash-goal-card">
           <h2>Goal progress</h2>
           <div class="stack">
             <div class="row between">
@@ -478,14 +532,14 @@
           <div id="dash-alerts" class="stack"></div>
         </div>
 
-        <div class="card span-6">
+        <div class="card span-6 dash-section dash-releases-card">
           <div class="row between">
-            <h2>Upcoming releases</h2>
+            <h2>Next / Upcoming release</h2>
             <button class="small" data-action="add-book">Add book</button>
           </div>
           <div id="dash-upcoming" class="cards-list"></div>
         </div>
-        <div class="card span-6">
+        <div class="card span-6 dash-section dash-expenses-card">
           <h2>Expense snapshot</h2>
           <div class="table-wrap">
             <table>
@@ -770,7 +824,8 @@ const defaultState = {
     "fullNovelPrintRoyalty": 3.0,
     "novellaPrintRoyalty": 2.0,
     "businessInternetPct": 40,
-    "businessCellPct": 40
+    "businessCellPct": 40,
+    "dashboardLayout": "tasks"
   },
   "books": [],
   "tasks": [],
@@ -905,6 +960,75 @@ function render(){
   renderBackup();
   renderSettings();
 }
+
+function dashboardLayout(){
+  if(!state.settings) state.settings = {};
+  return state.settings.dashboardLayout || "tasks";
+}
+function setDashboardLayout(layout){
+  if(!state.settings) state.settings = {};
+  state.settings.dashboardLayout = layout;
+  saveState();
+  render();
+  showToast("Dashboard layout updated.");
+}
+function applyDashboardLayout(){
+  const layout = dashboardLayout();
+  const orderSets = {
+    tasks: {
+      ".dashboard-layout-bar":0,
+      ".dash-week-card":1,
+      ".dash-releases-card":2,
+      ".dash-goal-card":3,
+      ".dash-actions-card":4,
+      ".dash-gross-card":5,
+      ".dash-tax-card":6,
+      ".dash-books-live-card":7,
+      ".dash-expenses-card":8
+    },
+    release: {
+      ".dashboard-layout-bar":0,
+      ".dash-releases-card":1,
+      ".dash-week-card":2,
+      ".dash-goal-card":3,
+      ".dash-actions-card":4,
+      ".dash-gross-card":5,
+      ".dash-tax-card":6,
+      ".dash-books-live-card":7,
+      ".dash-expenses-card":8
+    },
+    money: {
+      ".dashboard-layout-bar":0,
+      ".dash-gross-card":1,
+      ".dash-tax-card":2,
+      ".dash-expenses-card":3,
+      ".dash-actions-card":4,
+      ".dash-goal-card":5,
+      ".dash-week-card":6,
+      ".dash-releases-card":7,
+      ".dash-books-live-card":8
+    },
+    default: {
+      ".dashboard-layout-bar":0,
+      ".dash-books-live-card":1,
+      ".dash-gross-card":2,
+      ".dash-tax-card":3,
+      ".dash-actions-card":4,
+      ".dash-week-card":5,
+      ".dash-goal-card":6,
+      ".dash-releases-card":7,
+      ".dash-expenses-card":8
+    }
+  };
+  const set = orderSets[layout] || orderSets.tasks;
+  Object.entries(set).forEach(([selector, order])=>{
+    document.querySelectorAll(selector).forEach(el=>{ el.style.order = order; });
+  });
+  document.querySelectorAll("[data-layout-choice]").forEach(btn=>{
+    btn.classList.toggle("primary", btn.getAttribute("data-layout-choice") === layout);
+  });
+}
+
 function renderDashboard(){
   const booksLive = publishedBooks().length;
   const metrics = thisMonthMetrics();
@@ -945,6 +1069,7 @@ function renderDashboard(){
   if(overdue) alerts.push(`<div class="pill red">${overdue} overdue task${overdue===1?"":"s"}</div>`);
   if(!alerts.length) alerts.push(`<div class="pill green">No urgent alerts</div>`);
   document.getElementById("dash-alerts").innerHTML = alerts.join("");
+  applyDashboardLayout();
 }
 function taskHTML(t){
   const book = titleById(t.bookId);
@@ -1916,6 +2041,8 @@ function handleAction(action, id, btn){
 }
 
 document.addEventListener("click", function(e){
+  const layoutBtn = e.target.closest("[data-layout-choice]");
+  if(layoutBtn){ e.preventDefault(); setDashboardLayout(layoutBtn.getAttribute("data-layout-choice")); return; }
   if(e.target.closest(".home-btn")){ e.preventDefault(); goHome(); return; }
   const btn = e.target.closest("[data-action]");
   if(!btn) return;
