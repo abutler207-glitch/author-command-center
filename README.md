@@ -1,22 +1,28 @@
-Author Command Center v20 — Sticky Metric Updater
+Author Command Center v21 — Marketing / Ads Impact Tracking
 
 What's new:
-- Replaced sticky + Book with Update Metric.
-- Update Metric is designed for frequent daily updates to pages read, ebook sales, print sales, and royalties.
-- If you have one book, it opens that book's current-month metric directly.
-- If you have multiple books, it opens a metric updater hub with add/update buttons by book.
-- Saving a metric now updates the existing same-month/same-book entry instead of creating duplicates.
-- Metrics table now shows last updated time.
-- Add Book is still available on the Books tab and release/dashboard book sections.
-- Header shows v20 after deployment.
+- Added a Marketing tab.
+- Track ads, promos, newsletter swaps, Goodreads pushes, organic social, and launch campaigns.
+- Campaigns track:
+  - spend
+  - attributed ebook sales
+  - KU page lift
+  - attributed print sales
+  - attributed gross return
+  - estimated reader actions
+  - net after spend
+  - ROAS
+- Current-month marketing dashboard shows spend, gross, net, ROAS, KU page lift, and reader-action impact.
+- Marketing data is included in Drive Backup ZIP as Marketing_Campaigns.csv.
+- Header shows v21 after deployment.
 
 Deploy:
 1. Upload/overwrite all files in your GitHub repository with this folder's contents.
 2. Commit changes.
-3. Open your GitHub Pages URL with ?v=20:
-   https://YOURUSERNAME.github.io/author-command-center/?v=20
+3. Open your GitHub Pages URL with ?v=21:
+   https://YOURUSERNAME.github.io/author-command-center/?v=21
 
-If your phone still shows the old sticky + Book button:
+If your phone still shows the old layout:
 - Delete the old Home Screen icon.
-- Open the ?v=20 URL.
-- Add the ?v=20 page to Home Screen again.
+- Open the ?v=21 URL.
+- Add the ?v=21 page to Home Screen again.

@@ -635,6 +635,27 @@
       }
     }
 
+  
+    /* v21 marketing table */
+    @media(max-width:520px){
+      #marketing .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+      #marketing .dashboard-grid > .card.metric {
+        grid-column: span 1 !important;
+        min-height: 92px !important;
+        padding: 12px !important;
+        border-radius: 16px !important;
+      }
+      #marketing .dashboard-grid > .card:not(.metric) {
+        grid-column: 1 / -1 !important;
+      }
+      #marketing .card.metric .label { font-size: 12px !important; }
+      #marketing .card.metric .value { font-size: 24px !important; }
+      #marketing .card.metric .note { font-size: 11px !important; }
+    }
+
   </style>
 </head>
 <body>
@@ -644,7 +665,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v20</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v21</div>
         </div>
       </div>
       <div class="toolbar">
@@ -668,6 +689,7 @@
       <button class="tab" data-view="receipts">Receipts</button>
       <button class="tab" data-view="metrics">Metrics</button>
       <button class="tab" data-view="trends">Trends</button>
+      <button class="tab" data-view="marketing">Marketing</button>
       <button class="tab" data-view="backup">Backup</button>
       <button class="tab" data-view="settings">Settings</button>
     </nav>
@@ -930,6 +952,80 @@
       </div>
     </section>
 
+    <section id="marketing" class="views">
+      <div class="dashboard-grid grid">
+        <div class="card span-12">
+          <div class="row between">
+            <div>
+              <h2>Marketing / Ads</h2>
+              <div class="muted">Track campaign spend and how it impacts sales, KU pages, and reader actions.</div>
+            </div>
+            <button class="small primary" type="button" data-action="add-campaign">+ Campaign</button>
+          </div>
+        </div>
+
+        <div class="card metric span-3">
+          <div>
+            <div class="label">This month spend</div>
+            <div id="mk-spend-month" class="value">$0</div>
+          </div>
+          <div class="note">Ads/promos entered</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Attributed gross</div>
+            <div id="mk-gross-month" class="value">$0</div>
+          </div>
+          <div class="note">Manual attribution</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Net after spend</div>
+            <div id="mk-net-month" class="value">$0</div>
+          </div>
+          <div class="note">Gross - spend</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">ROAS</div>
+            <div id="mk-roas-month" class="value">0.0x</div>
+          </div>
+          <div class="note">Gross / spend</div>
+        </div>
+
+        <div class="card span-6">
+          <h2>Impact this month</h2>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><td class="muted">Attributed ebook sales</td><td id="mk-sales-month" style="text-align:right">0</td></tr>
+                <tr><td class="muted">KU page lift</td><td id="mk-ku-pages-month" style="text-align:right">0</td></tr>
+                <tr><td class="muted">KU full-read equivalents</td><td id="mk-ku-reads-month" style="text-align:right">0</td></tr>
+                <tr><td class="muted">Attributed reader actions</td><td id="mk-actions-month" style="text-align:right">0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer-note">Use these as estimates. KDP/Amazon attribution can be imperfect, especially with KU read-through.</div>
+        </div>
+
+        <div class="card span-6">
+          <h2>Best current campaign</h2>
+          <div id="mk-best-campaign" class="cards-list"></div>
+        </div>
+
+        <div class="card span-12">
+          <div class="row between">
+            <h2>Campaigns</h2>
+            <div class="row">
+              <button class="small" type="button" onclick="exportMarketingCSV()">Export CSV</button>
+              <button class="small primary" type="button" data-action="add-campaign">+ Campaign</button>
+            </div>
+          </div>
+          <div class="table-wrap"><table id="marketing-table"></table></div>
+        </div>
+      </div>
+    </section>
+
     <section id="backup" class="views">
       <div class="dashboard-grid grid">
         <div class="card span-7">
@@ -1035,7 +1131,8 @@ const defaultState = {
   "books": [],
   "tasks": [],
   "expenses": [],
-  "metrics": []
+  "metrics": [],
+  "marketing": []
 };
 
 let state = loadState();
@@ -1055,14 +1152,28 @@ function nextWeekdayISO(targetDay){
   d.setDate(d.getDate()+diff);
   return d.toISOString().slice(0,10);
 }
+function normalizeState(s){
+  s = s || JSON.parse(JSON.stringify(defaultState));
+  if(!s.settings) s.settings = JSON.parse(JSON.stringify(defaultState.settings));
+  Object.keys(defaultState.settings || {}).forEach(k=>{
+    if(s.settings[k] === undefined) s.settings[k] = defaultState.settings[k];
+  });
+  if(!Array.isArray(s.books)) s.books = [];
+  if(!Array.isArray(s.tasks)) s.tasks = [];
+  if(!Array.isArray(s.expenses)) s.expenses = [];
+  if(!Array.isArray(s.metrics)) s.metrics = [];
+  if(!Array.isArray(s.marketing)) s.marketing = [];
+  return s;
+}
 function loadState(){
   const raw = localStorage.getItem(STORAGE_KEY);
   if(!raw){
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(defaultState));
-    return JSON.parse(JSON.stringify(defaultState));
+    const fresh = normalizeState(JSON.parse(JSON.stringify(defaultState)));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(fresh));
+    return fresh;
   }
-  try{return JSON.parse(raw)}
-  catch(e){return structuredClone(defaultState)}
+  try{return normalizeState(JSON.parse(raw))}
+  catch(e){return normalizeState(JSON.parse(JSON.stringify(defaultState)))}
 }
 function saveState(){
   localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -1168,6 +1279,7 @@ function render(){
   renderReceipts();
   renderMetrics();
   renderTrends();
+  renderMarketing();
   renderBackup();
   renderSettings();
 }
@@ -1800,6 +1912,165 @@ function renderMetrics(){
   }).join("");
   document.getElementById("metrics-table").innerHTML = `<thead><tr><th>Month</th><th>Book</th><th>Ebook</th><th>KU Pages</th><th>KU Reads</th><th>Print</th><th>Actions</th><th>Gap</th><th>Gross</th><th>Updated</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="11" class="muted">No metrics yet. Add your monthly KDP numbers when books are live.</td></tr>'}</tbody>`;
 }
+
+function campaignImpact(c){
+  c = c || {};
+  const b = bookById(c.bookId);
+  const kenp = Number(c.kenp || (b && b.kenp) || 340);
+  const spend = Number(c.spend || 0);
+  const gross = Number(c.grossReturn || 0);
+  const ebookSales = Number(c.ebookSales || 0);
+  const kuPages = Number(c.kuPageLift || 0);
+  const kuReads = kenp ? kuPages / kenp : 0;
+  const printSales = Number(c.printSales || 0);
+  const actions = ebookSales + kuReads + printSales;
+  const net = gross - spend;
+  const roas = spend ? gross / spend : 0;
+  return {spend, gross, ebookSales, kuPages, kuReads, printSales, actions, net, roas};
+}
+function monthBounds(key=currentMonthKey()){
+  const [y,m] = key.split("-").map(Number);
+  const start = new Date(y, m-1, 1);
+  const end = new Date(y, m, 0, 23,59,59,999);
+  return {start,end};
+}
+function campaignInMonth(c, key=currentMonthKey()){
+  const {start,end} = monthBounds(key);
+  const s = c.startDate ? new Date(c.startDate+"T00:00:00") : start;
+  const e = c.endDate ? new Date(c.endDate+"T23:59:59") : s;
+  return s <= end && e >= start;
+}
+function renderMarketing(){
+  if(!Array.isArray(state.marketing)) state.marketing = [];
+  const key = currentMonthKey();
+  const current = state.marketing.filter(c => campaignInMonth(c, key));
+  const totals = current.reduce((acc,c)=>{
+    const im = campaignImpact(c);
+    acc.spend += im.spend; acc.gross += im.gross; acc.ebookSales += im.ebookSales;
+    acc.kuPages += im.kuPages; acc.kuReads += im.kuReads; acc.printSales += im.printSales;
+    acc.actions += im.actions; return acc;
+  }, {spend:0,gross:0,ebookSales:0,kuPages:0,kuReads:0,printSales:0,actions:0});
+  totals.net = totals.gross - totals.spend;
+  totals.roas = totals.spend ? totals.gross/totals.spend : 0;
+  const setText = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
+  setText("mk-spend-month", money(totals.spend));
+  setText("mk-gross-month", money(totals.gross));
+  setText("mk-net-month", money(totals.net));
+  setText("mk-roas-month", totals.roas.toFixed(1) + "x");
+  setText("mk-sales-month", num(totals.ebookSales));
+  setText("mk-ku-pages-month", num(totals.kuPages));
+  setText("mk-ku-reads-month", num(totals.kuReads));
+  setText("mk-actions-month", num(totals.actions));
+  const netEl = document.getElementById("mk-net-month");
+  if(netEl){ netEl.className = "value " + (totals.net >= 0 ? "good" : "bad"); }
+
+  const best = current.slice().sort((a,b)=>campaignImpact(b).net-campaignImpact(a).net)[0];
+  const bestBox = document.getElementById("mk-best-campaign");
+  if(bestBox){
+    if(best){
+      const im = campaignImpact(best);
+      bestBox.innerHTML = `<div class="book-card">
+        <div>
+          <div class="book-title">${escapeHTML(best.name || "Untitled Campaign")}</div>
+          <div class="book-sub">${escapeHTML(best.platform || "")} • ${escapeHTML(best.status || "")} • ${escapeHTML(titleById(best.bookId) || "All books")}</div>
+          <div class="row" style="margin-top:10px;flex-wrap:wrap">
+            <span class="pill">Spend ${money2(im.spend)}</span>
+            <span class="pill green">Gross ${money2(im.gross)}</span>
+            <span class="pill ${im.net>=0?'green':'red'}">Net ${money2(im.net)}</span>
+            <span class="pill gold">ROAS ${im.roas.toFixed(1)}x</span>
+          </div>
+        </div>
+        <div class="actions"><button class="small" data-action="edit-campaign" data-id="${best.id}">Edit</button></div>
+      </div>`;
+    } else {
+      bestBox.innerHTML = `<div class="empty">No marketing campaigns entered for this month yet.</div>`;
+    }
+  }
+
+  const rows = state.marketing.slice().sort((a,b)=>(b.startDate||"").localeCompare(a.startDate||"")).map(c=>{
+    const im = campaignImpact(c);
+    return `<tr>
+      <td>${escapeHTML(c.name || "")}</td>
+      <td>${escapeHTML(c.platform || "")}</td>
+      <td>${escapeHTML(titleById(c.bookId) || "All")}</td>
+      <td>${dateFmt(c.startDate)}${c.endDate ? "–" + dateFmt(c.endDate) : ""}</td>
+      <td>${money2(im.spend)}</td>
+      <td>${num(im.ebookSales)}</td>
+      <td>${num(im.kuPages)}</td>
+      <td>${num(im.actions)}</td>
+      <td>${money2(im.gross)}</td>
+      <td class="${im.net>=0?'good':'bad'}">${money2(im.net)}</td>
+      <td>${im.roas.toFixed(1)}x</td>
+      <td><button class="small" data-action="edit-campaign" data-id="${c.id}">Edit</button></td>
+      <td><button class="small danger" data-action="delete-campaign" data-id="${c.id}">Delete</button></td>
+    </tr>`;
+  }).join("");
+  const table = document.getElementById("marketing-table");
+  if(table){
+    table.innerHTML = `<thead><tr><th>Campaign</th><th>Platform</th><th>Book</th><th>Dates</th><th>Spend</th><th>Sales</th><th>KU Pages</th><th>Actions</th><th>Gross</th><th>Net</th><th>ROAS</th><th></th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="13" class="muted">No campaigns yet. Add ads, newsletter swaps, promos, or social pushes here.</td></tr>'}</tbody>`;
+  }
+}
+function campaignForm(c={}){
+  c = c || {};
+  return `<form data-form="campaign">
+    <div class="form-grid">
+      <div class="full"><label>Campaign name</label><input name="name" required value="${attr(c.name)}" placeholder="Amazon Book 1 Test / Newsletter Swap / Promo"></div>
+      <div><label>Platform</label><select name="platform">
+        ${["Amazon Ads","BookBub Ads","Meta Ads","Goodreads","Newsletter Swap","Promo Site","Organic Social","Other"].map(x=>`<option ${c.platform===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Type</label><select name="type">
+        ${["Ad","Promo","Newsletter","Organic/Social","Launch Push","Other"].map(x=>`<option ${c.type===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Related book</label><select name="bookId">${bookOptions(c.bookId)}</select></div>
+      <div><label>Status</label><select name="status">
+        ${["Planning","Testing","Active","Paused","Ended"].map(x=>`<option ${c.status===x?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Start date</label><input type="date" name="startDate" value="${attr(c.startDate || todayISO())}"></div>
+      <div><label>End date</label><input type="date" name="endDate" value="${attr(c.endDate || "")}"></div>
+      <div><label>Spend $</label><input type="number" step="0.01" name="spend" value="${c.spend??0}" inputmode="decimal"></div>
+      <div><label>Attributed ebook sales</label><input type="number" name="ebookSales" value="${c.ebookSales??0}" inputmode="numeric"></div>
+      <div><label>KU page lift</label><input type="number" name="kuPageLift" value="${c.kuPageLift??0}" inputmode="numeric"></div>
+      <div><label>Attributed print sales</label><input type="number" name="printSales" value="${c.printSales??0}" inputmode="numeric"></div>
+      <div><label>Attributed gross return $</label><input type="number" step="0.01" name="grossReturn" value="${c.grossReturn??0}" inputmode="decimal"></div>
+      <div class="full"><label>Notes</label><textarea name="notes" placeholder="Targeting, keywords, promo source, what changed, observed KU lift...">${escapeHTML(c.notes||"")}</textarea></div>
+    </div>
+    <div class="footer-note">Tip: enter the lift you can reasonably attribute to the campaign. For KU, use page-read lift compared with your normal baseline.</div>
+    <div class="form-actions"><button type="button" data-action="close-modal">Cancel</button><button class="primary" type="submit">Save Campaign</button></div>
+  </form>`;
+}
+function saveCampaign(e){
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const obj = {
+    id: editingId || uid("C"),
+    name:f.get("name"), platform:f.get("platform"), type:f.get("type"), bookId:f.get("bookId"),
+    status:f.get("status"), startDate:f.get("startDate"), endDate:f.get("endDate"),
+    spend:Number(f.get("spend")), ebookSales:Number(f.get("ebookSales")),
+    kuPageLift:Number(f.get("kuPageLift")), printSales:Number(f.get("printSales")),
+    grossReturn:Number(f.get("grossReturn")), notes:f.get("notes"), updatedAt:new Date().toISOString()
+  };
+  if(!Array.isArray(state.marketing)) state.marketing = [];
+  upsert("marketing", obj); closeModal(); saveState(); render(); showToast("Campaign saved.");
+}
+function exportMarketingCSV(){
+  const headers = ["Campaign","Platform","Type","Book","Status","Start Date","End Date","Spend","Attributed Ebook Sales","KU Page Lift","Attributed Print Sales","Reader Actions","Gross Return","Net After Spend","ROAS","Notes"];
+  const rows = (state.marketing||[]).map(c=>{
+    const im = campaignImpact(c);
+    return {
+      "Campaign":c.name||"", "Platform":c.platform||"", "Type":c.type||"", "Book":titleById(c.bookId)||"All",
+      "Status":c.status||"", "Start Date":c.startDate||"", "End Date":c.endDate||"",
+      "Spend":im.spend.toFixed(2), "Attributed Ebook Sales":im.ebookSales, "KU Page Lift":im.kuPages,
+      "Attributed Print Sales":im.printSales, "Reader Actions":im.actions.toFixed(2),
+      "Gross Return":im.gross.toFixed(2), "Net After Spend":im.net.toFixed(2), "ROAS":im.roas.toFixed(2),
+      "Notes":c.notes||""
+    };
+  });
+  const csv = toCSV(headers, rows);
+  const blob = new Blob([csv], {type:"text/csv"});
+  downloadBlob(blob, "Author_Command_Center_Marketing.csv");
+}
+
+
 function renderSettings(){
   const s = state.settings;
   const fields = [
@@ -1855,13 +2126,13 @@ function closeModalOnBackdrop(e){
   if(e.target.id === "modal-backdrop") closeModal();
 }
 function editItem(type,id){
-  const map = {book:"books", task:"tasks", expense:"expenses", metric:"metrics"};
+  const map = {book:"books", task:"tasks", expense:"expenses", metric:"metrics", campaign:"marketing"};
   const item = state[map[type]].find(x=>x.id===id);
   openModal(type,item);
 }
 function deleteItem(type,id){
   if(!confirm("Delete this item?")) return;
-  const map = {book:"books", task:"tasks", expense:"expenses", metric:"metrics"};
+  const map = {book:"books", task:"tasks", expense:"expenses", metric:"metrics", campaign:"marketing"};
   state[map[type]] = state[map[type]].filter(x=>x.id!==id);
   saveState(); render(); showToast("Deleted.");
 }
@@ -2127,11 +2398,22 @@ function buildCSVFiles(){
     "Tax Year":e.taxYear,"Receipt Attached":e.receiptData?"Yes":"No","Receipt File":e.receiptName || "",
     "Suggested Folder":`Receipts/${e.taxYear || ""}/${sanitizeName(e.category || "Other")}`
   }));
+  const marketingRows = (state.marketing||[]).map(c=>{
+    const im = campaignImpact(c);
+    return {
+      "Campaign ID":c.id,"Campaign":c.name,"Platform":c.platform,"Type":c.type,"Book":titleById(c.bookId)||"All",
+      "Status":c.status,"Start Date":c.startDate,"End Date":c.endDate,"Spend":im.spend.toFixed(2),
+      "Attributed Ebook Sales":im.ebookSales,"KU Page Lift":im.kuPages,"Attributed Print Sales":im.printSales,
+      "Reader Actions":im.actions.toFixed(2),"Gross Return":im.gross.toFixed(2),
+      "Net After Spend":im.net.toFixed(2),"ROAS":im.roas.toFixed(2),"Notes":c.notes
+    }
+  });
   return [
     {name:"Author_Command_Center/CSV/Books.csv", data:toCSV(Object.keys(booksRows[0]||{"Book ID":""}), booksRows)},
     {name:"Author_Command_Center/CSV/Tasks.csv", data:toCSV(Object.keys(tasksRows[0]||{"Task ID":""}), tasksRows)},
     {name:"Author_Command_Center/CSV/Expenses.csv", data:toCSV(Object.keys(expenseRows[0]||{"Expense ID":""}), expenseRows)},
     {name:"Author_Command_Center/CSV/Monthly_Metrics.csv", data:toCSV(Object.keys(metricRows[0]||{"Metric ID":""}), metricRows)},
+    {name:"Author_Command_Center/CSV/Marketing_Campaigns.csv", data:toCSV(Object.keys(marketingRows[0]||{"Campaign ID":""}), marketingRows)},
     {name:"Author_Command_Center/CSV/Receipts_Manifest.csv", data:toCSV(Object.keys(receiptRows[0]||{"Expense ID":""}), receiptRows)}
   ];
 }
@@ -2304,6 +2586,9 @@ function handleAction(action, id, btn){
     case "add-book": openModal("book"); break;
     case "add-metric": openMetricSafely(); break;
     case "update-metric": openMetricUpdateHub(); break;
+    case "add-campaign": openModal("campaign"); break;
+    case "edit-campaign": editItem("campaign", id); break;
+    case "delete-campaign": deleteItem("campaign", id); break;
     case "export-json": exportData(); break;
     case "drive-backup-share": exportGoogleDriveZip(true); break;
     case "drive-backup-download": exportGoogleDriveZip(false); break;
@@ -2361,6 +2646,7 @@ document.addEventListener("submit", function(e){
     else if(type === "task") saveTask(e);
     else if(type === "expense") saveExpense(e);
     else if(type === "metric") saveMetric(e);
+    else if(type === "campaign") saveCampaign(e);
   }catch(err){
     console.error(err);
     alert("Could not save " + type + ". " + (err && err.message ? err.message : err));
