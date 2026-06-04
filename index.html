@@ -427,6 +427,214 @@
       }
     }
 
+  
+    /* v16 compact mobile header: no horizontal scrolling for sticky action buttons */
+    @media(max-width:520px){
+      header {
+        position: sticky;
+        top: 0;
+      }
+
+      .topbar {
+        gap: 8px;
+        padding-top: 10px;
+        padding-bottom: 8px;
+      }
+
+      .brand {
+        gap: 9px;
+        align-items: center;
+      }
+
+      .logo {
+        width: 32px;
+        height: 32px;
+        border-radius: 11px;
+        font-size: 15px;
+        flex: 0 0 auto;
+      }
+
+      h1 {
+        font-size: 19px;
+        line-height: 1.05;
+      }
+
+      .subtitle {
+        font-size: 11px;
+        line-height: 1.18;
+        margin-top: 2px;
+      }
+
+      /* 3 columns x 2 rows. Compact, visible, no sideways scrolling. */
+      .toolbar {
+        width: 100%;
+        display: grid !important;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 6px !important;
+        overflow: visible !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+
+      .toolbar button,
+      .toolbar .btn {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 34px;
+        min-height: 34px;
+        padding: 6px 6px !important;
+        border-radius: 12px !important;
+        font-size: 12px;
+        line-height: 1;
+        white-space: nowrap;
+        text-align: center;
+        justify-content: center;
+      }
+
+      .toolbar .home-btn {
+        order: -1;
+      }
+
+      /* Keep dashboard focus visible but compact; no horizontal scroll. */
+      .dashboard-layout-bar {
+        padding: 10px !important;
+        border-radius: 16px;
+      }
+
+      .dashboard-layout-row {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 7px !important;
+      }
+
+      .dashboard-layout-row strong {
+        font-size: 14px;
+      }
+
+      .dashboard-layout-bar .footer-note {
+        display: none;
+      }
+
+      .layout-buttons {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px !important;
+        overflow: visible !important;
+        padding: 0 !important;
+      }
+
+      .layout-buttons button {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 32px;
+        min-height: 32px;
+        padding: 5px 6px !important;
+        border-radius: 11px !important;
+        font-size: 12px;
+        white-space: nowrap;
+      }
+
+      nav.tabs {
+        padding-top: 8px;
+        padding-bottom: 10px;
+      }
+
+      main {
+        padding-top: 10px;
+      }
+    }
+
+  
+    /* v17: Dashboard focus moved to Settings */
+    .settings-focus-block {
+      margin: 12px 0 4px;
+    }
+    .settings-focus-block h3 {
+      margin: 0 0 6px;
+      font-size: 16px;
+    }
+    .settings-layout-buttons {
+      margin-top: 10px;
+    }
+    @media(max-width:520px){
+      .settings-layout-buttons {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 6px !important;
+      }
+      .settings-layout-buttons button {
+        width: 100% !important;
+        min-width: 0 !important;
+        height: 34px;
+        font-size: 12px;
+      }
+    }
+
+  
+    /* v18: dashboard stat cards side-by-side on mobile */
+    @media(max-width:520px){
+      #dashboard .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+
+      #dashboard .dashboard-grid > .card.metric {
+        grid-column: span 1 !important;
+        min-height: 92px !important;
+        padding: 12px !important;
+        border-radius: 16px !important;
+      }
+
+      #dashboard .dashboard-grid > .card.metric .label {
+        font-size: 12px !important;
+        line-height: 1.2;
+      }
+
+      #dashboard .dashboard-grid > .card.metric .value {
+        font-size: 26px !important;
+        line-height: 1.05;
+      }
+
+      #dashboard .dashboard-grid > .card.metric .note {
+        font-size: 11px !important;
+        line-height: 1.25;
+      }
+
+      #dashboard .dash-week-card,
+      #dashboard .dash-releases-card,
+      #dashboard .dash-goal-card,
+      #dashboard .dash-expenses-card {
+        grid-column: 1 / -1 !important;
+      }
+
+      #dashboard .dash-week-card,
+      #dashboard .dash-releases-card {
+        padding: 14px !important;
+      }
+
+      #dashboard .dash-week-card h2,
+      #dashboard .dash-releases-card h2,
+      #dashboard .dash-goal-card h2,
+      #dashboard .dash-expenses-card h2 {
+        font-size: 20px !important;
+      }
+
+      #dashboard .book-card,
+      #dashboard .task-item {
+        padding: 12px !important;
+      }
+    }
+
+  
+    /* v20 metric updater top button */
+    @media(max-width:520px){
+      .toolbar button[data-action="update-metric"] {
+        font-size: 11px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -436,13 +644,13 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v14</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v20</div>
         </div>
       </div>
       <div class="toolbar">
         <button class="small primary" data-action="add-task">+ Task</button>
         <button class="small" data-action="add-expense">+ Expense</button>
-        <button class="small" data-action="add-book">+ Book</button>
+        <button class="small" data-action="update-metric">Update Metric</button>
         <button class="small ghost home-btn" type="button" onclick="goHome()">🏠 Home</button>
         <button class="small primary" data-action="drive-backup-share">Drive Backup</button>
         <label class="btn small ghost" for="import-file">Import</label>
@@ -466,21 +674,6 @@
 
     <section id="dashboard" class="views active">
       <div class="dashboard-grid grid">
-        <div class="card span-12 dashboard-layout-bar">
-          <div class="row between dashboard-layout-row">
-            <div>
-              <strong>Dashboard focus</strong>
-              <div class="footer-note">Move the sections you use most to the top.</div>
-            </div>
-            <div class="layout-buttons">
-              <button class="small" type="button" data-layout-choice="tasks">Tasks first</button>
-              <button class="small" type="button" data-layout-choice="release">Release first</button>
-              <button class="small" type="button" data-layout-choice="money">Money first</button>
-              <button class="small" type="button" data-layout-choice="default">Default</button>
-            </div>
-          </div>
-        </div>
-        
         <div class="card metric span-3 dash-section dash-books-live-card">
           <div>
             <div class="label">Books live</div>
@@ -497,10 +690,10 @@
         </div>
         <div class="card metric span-3 dash-section dash-tax-card">
           <div>
-            <div class="label">Tax reserve</div>
+            <div class="label">This month net</div>
             <div id="dash-tax" class="value">$0</div>
           </div>
-          <div class="note">Based on your setting</div>
+          <div class="note">Gross minus tax reserve</div>
         </div>
         <div class="card metric span-3 dash-section dash-actions-card">
           <div>
@@ -790,6 +983,18 @@
     <section id="settings" class="views">
       <div class="card">
         <h2>Settings</h2>
+        <div class="settings-focus-block">
+          <h3>Dashboard focus</h3>
+          <div class="footer-note">Choose which Dashboard sections appear first.</div>
+          <div class="layout-buttons settings-layout-buttons">
+            <button class="small" type="button" data-layout-choice="tasks">Tasks first</button>
+            <button class="small" type="button" data-layout-choice="release">Release first</button>
+            <button class="small" type="button" data-layout-choice="money">Money first</button>
+            <button class="small" type="button" data-layout-choice="default">Default</button>
+          </div>
+          <hr style="border:none;border-top:1px solid var(--line);margin:16px 0">
+        </div>
+
         <div id="settings-list"></div>
         <div class="form-actions">
           <button class="primary" data-action="save-settings">Save settings</button>
@@ -870,6 +1075,12 @@ function dateFmt(iso){
   if(!iso) return "";
   const d = new Date(iso+"T00:00:00");
   return d.toLocaleDateString(undefined,{month:"short", day:"numeric", year:"numeric"});
+}
+function shortDateTime(iso){
+  if(!iso) return "—";
+  const d = new Date(iso);
+  if(isNaN(d.getTime())) return "—";
+  return d.toLocaleDateString(undefined,{month:"short", day:"numeric"}) + " " + d.toLocaleTimeString(undefined,{hour:"numeric", minute:"2-digit"});
 }
 function startOfWeek(d=new Date()){
   const x = new Date(d);
@@ -976,7 +1187,6 @@ function applyDashboardLayout(){
   const layout = dashboardLayout();
   const orderSets = {
     tasks: {
-      ".dashboard-layout-bar":0,
       ".dash-week-card":1,
       ".dash-releases-card":2,
       ".dash-goal-card":3,
@@ -987,7 +1197,6 @@ function applyDashboardLayout(){
       ".dash-expenses-card":8
     },
     release: {
-      ".dashboard-layout-bar":0,
       ".dash-releases-card":1,
       ".dash-week-card":2,
       ".dash-goal-card":3,
@@ -998,7 +1207,6 @@ function applyDashboardLayout(){
       ".dash-expenses-card":8
     },
     money: {
-      ".dashboard-layout-bar":0,
       ".dash-gross-card":1,
       ".dash-tax-card":2,
       ".dash-expenses-card":3,
@@ -1009,7 +1217,6 @@ function applyDashboardLayout(){
       ".dash-books-live-card":8
     },
     default: {
-      ".dashboard-layout-bar":0,
       ".dash-books-live-card":1,
       ".dash-gross-card":2,
       ".dash-tax-card":3,
@@ -1043,7 +1250,7 @@ function renderDashboard(){
 
   document.getElementById("dash-books-live").textContent = booksLive;
   document.getElementById("dash-gross").textContent = money(gross);
-  document.getElementById("dash-tax").textContent = money(tax);
+  document.getElementById("dash-tax").textContent = money(gross - tax);
   document.getElementById("dash-actions").textContent = num(actions);
   const pct = totalGoal ? Math.min(100, Math.round(actions/totalGoal*100)) : 0;
   document.getElementById("dash-actions-note").textContent = `${pct}% of monthly goal`;
@@ -1253,6 +1460,76 @@ function openMetricSafely(){
   }
 }
 
+
+
+
+function openMetricUpdateHub(){
+  try{
+    const books = state.books || [];
+    if(!books.length){
+      showToast("Add a book first, then track metrics.");
+      openModal("book");
+      return;
+    }
+    const key = currentMonthKey();
+    const current = (state.metrics || []).filter(m => metricMonthKey(m) === key);
+    if(books.length === 1){
+      const existing = current.find(m => m.bookId === books[0].id);
+      if(existing){ editItem("metric", existing.id); }
+      else { openModal("metric", null, books[0].id); }
+      return;
+    }
+    const title = document.getElementById("modal-title");
+    const body = document.getElementById("modal-body");
+    currentModal = "metricHub";
+    editingId = null;
+    if(title) title.textContent = "Update Monthly Metrics";
+    const metricRows = current.length ? current.map(m=>{
+      const c = calcMetric(m);
+      return `<div class="book-card">
+        <div>
+          <div class="book-title">${escapeHTML(titleById(m.bookId) || "Unknown Book")}</div>
+          <div class="book-sub">${escapeHTML(m.month || key)} • ${num(c.actions)} actions • ${money2(c.gross)} gross</div>
+          <div class="footer-note">Updated: ${shortDateTime(m.updatedAt)}</div>
+        </div>
+        <div class="actions">
+          <button class="small primary" data-action="edit-metric" data-id="${m.id}">Update</button>
+        </div>
+      </div>`;
+    }).join("") : `<div class="empty">No metrics entered for this month yet.</div>`;
+
+    const bookButtons = books.map(b=>{
+      const existing = current.find(m => m.bookId === b.id);
+      const action = existing ? "edit-metric" : "add-metric-book";
+      const id = existing ? existing.id : b.id;
+      const label = existing ? "Update" : "Add";
+      return `<div class="book-card">
+        <div>
+          <div class="book-title">${escapeHTML(b.title || "Untitled Book")}</div>
+          <div class="book-sub">${escapeHTML(b.series || "")} • ${escapeHTML(b.type || "")}</div>
+        </div>
+        <div class="actions">
+          <button class="small" data-action="${action}" data-id="${id}">${label}</button>
+        </div>
+      </div>`;
+    }).join("");
+
+    if(body) body.innerHTML = `<div style="padding:16px">
+      <div class="stack">
+        <div class="footer-note">Current month: <strong>${key}</strong>. Use this for quick repeated updates to KU pages, sales, print, and royalties.</div>
+        <h3 style="margin:8px 0 0">Current month entries</h3>
+        <div class="cards-list">${metricRows}</div>
+        <h3 style="margin:12px 0 0">Add/update by book</h3>
+        <div class="cards-list">${bookButtons}</div>
+      </div>
+      <div class="form-actions"><button type="button" data-action="close-modal">Close</button></div>
+    </div>`;
+    document.getElementById("modal-backdrop").classList.add("active");
+  }catch(err){
+    console.error(err);
+    alert("Could not open metric updater. " + (err && err.message ? err.message : err));
+  }
+}
 
 
 function metricMonthKey(m){
@@ -1518,10 +1795,10 @@ function renderMetrics(){
       <td>${num(c.actions)}</td>
       <td class="${gap>=0?'good':'bad'}">${gap>=0?'+':''}${num(gap)}</td>
       <td>${money2(c.gross)}</td>
-      <td><button class="small" data-action="edit-metric" data-id="${m.id}">Edit</button></td>
+      <td>${shortDateTime(m.updatedAt)}</td><td><button class="small" data-action="edit-metric" data-id="${m.id}">Edit</button></td>
     </tr>`;
   }).join("");
-  document.getElementById("metrics-table").innerHTML = `<thead><tr><th>Month</th><th>Book</th><th>Ebook</th><th>KU Pages</th><th>KU Reads</th><th>Print</th><th>Actions</th><th>Gap</th><th>Gross</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="10" class="muted">No metrics yet. Add your monthly KDP numbers when books are live.</td></tr>'}</tbody>`;
+  document.getElementById("metrics-table").innerHTML = `<thead><tr><th>Month</th><th>Book</th><th>Ebook</th><th>KU Pages</th><th>KU Reads</th><th>Print</th><th>Actions</th><th>Gap</th><th>Gross</th><th>Updated</th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="11" class="muted">No metrics yet. Add your monthly KDP numbers when books are live.</td></tr>'}</tbody>`;
 }
 function renderSettings(){
   const s = state.settings;
@@ -1735,15 +2012,21 @@ async function saveExpense(e){
 function saveMetric(e){
   e.preventDefault();
   const f = new FormData(e.target);
+  const month = f.get("month");
+  const bookId = f.get("bookId");
+  const existing = !editingId ? (state.metrics || []).find(x => x.month === month && x.bookId === bookId) : null;
   const obj = {
-    id: editingId || uid("M"),
-    month:f.get("month"), bookId:f.get("bookId"),
-    ebookSales:Number(f.get("ebookSales")), kuPages:Number(f.get("kuPages")),
-    printSales:Number(f.get("printSales")), ebookRoyalty:Number(f.get("ebookRoyalty")),
+    id: editingId || (existing && existing.id) || uid("M"),
+    month: month, bookId: bookId,
+    ebookSales:Number(f.get("ebookSales")),
+    kuPages:Number(f.get("kuPages")),
+    printSales:Number(f.get("printSales")),
+    ebookRoyalty:Number(f.get("ebookRoyalty")),
     kuRoyalty:f.get("kuRoyalty"), printRoyalty:Number(f.get("printRoyalty")),
-    notes:f.get("notes")
+    notes:f.get("notes"),
+    updatedAt:new Date().toISOString()
   };
-  upsert("metrics", obj); closeModal(); saveState(); render(); showToast("Metric saved.");
+  upsert("metrics", obj); closeModal(); saveState(); render(); showToast(existing || editingId ? "Metric updated." : "Metric saved.");
 }
 function upsert(collection, obj){
   const i = state[collection].findIndex(x=>x.id===obj.id);
@@ -2019,6 +2302,8 @@ function handleAction(action, id, btn){
     case "add-task": openModal("task"); break;
     case "add-expense": openModal("expense"); break;
     case "add-book": openModal("book"); break;
+    case "add-metric": openMetricSafely(); break;
+    case "update-metric": openMetricUpdateHub(); break;
     case "export-json": exportData(); break;
     case "drive-backup-share": exportGoogleDriveZip(true); break;
     case "drive-backup-download": exportGoogleDriveZip(false); break;
