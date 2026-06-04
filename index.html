@@ -374,6 +374,20 @@
       }
     }
 
+  
+    /* v13: true sticky Home button replacement */
+    .home-btn {
+      border-color: rgba(201,168,106,.55) !important;
+      background: rgba(201,168,106,.10) !important;
+      color: #ffe5a8 !important;
+    }
+    .home-btn:hover {
+      background: rgba(201,168,106,.18) !important;
+    }
+    @media(max-width:520px){
+      .toolbar .home-btn { order: -1; }
+    }
+
   </style>
 </head>
 <body>
@@ -383,14 +397,14 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v12</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v13</div>
         </div>
       </div>
       <div class="toolbar">
         <button class="small primary" data-action="add-task">+ Task</button>
         <button class="small" data-action="add-expense">+ Expense</button>
         <button class="small" data-action="add-book">+ Book</button>
-        <button class="small ghost" data-action="export-json">Export JSON</button>
+        <button class="small ghost home-btn" type="button" onclick="goHome()">🏠 Home</button>
         <button class="small primary" data-action="drive-backup-share">Drive Backup</button>
         <label class="btn small ghost" for="import-file">Import</label>
         <input id="import-file" type="file" accept="application/json" style="display:none" onchange="importData(event)">
@@ -1902,6 +1916,7 @@ function handleAction(action, id, btn){
 }
 
 document.addEventListener("click", function(e){
+  if(e.target.closest(".home-btn")){ e.preventDefault(); goHome(); return; }
   const btn = e.target.closest("[data-action]");
   if(!btn) return;
   e.preventDefault();
