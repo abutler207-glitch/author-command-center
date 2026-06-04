@@ -706,6 +706,35 @@
       }
     }
 
+  
+    /* v26 earnings/lifetime mobile stat grid */
+    @media(max-width:520px){
+      #earnings .dashboard-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 10px !important;
+      }
+      #earnings .dashboard-grid > .card.metric {
+        grid-column: span 1 !important;
+        min-height: 92px !important;
+        padding: 12px !important;
+        border-radius: 16px !important;
+      }
+      #earnings .dashboard-grid > .card:not(.metric) {
+        grid-column: 1 / -1 !important;
+      }
+      #earnings .card.metric .label { font-size: 12px !important; }
+      #earnings .card.metric .value { font-size: 23px !important; }
+      #earnings .card.metric .note { font-size: 11px !important; }
+    }
+
+  
+    /* v27 marketing-expense link */
+    .campaign-expense-note {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
   </style>
 </head>
 <body>
@@ -715,7 +744,7 @@
         <div class="logo">AC</div>
         <div>
           <h1>Author Command Center</h1>
-          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v25</div>
+          <div class="subtitle">Books • Weekly checklists • Receipts • Income goals • v28</div>
         </div>
       </div>
       <div class="toolbar">
@@ -736,8 +765,9 @@
       <button class="tab" data-view="week">This Week</button>
       <button class="tab" data-view="marketing">Marketing</button>
       <button class="tab" data-view="metrics">Metrics</button>
+      <button class="tab" data-view="earnings">Lifetime</button>
       <button class="tab" data-view="receipts">Receipts</button>
-      <button class="tab" data-view="money">Money</button>
+      <button class="tab" data-view="money">Earnings</button>
       <button class="tab" data-view="trends">Trends</button>
       <button class="tab" data-view="books">Books</button>
       <button class="tab" data-view="backup">Backup</button>
@@ -933,6 +963,109 @@
       </div>
     </section>
 
+    <section id="earnings" class="views">
+      <div class="dashboard-grid grid">
+        <div class="card span-12">
+          <div class="row between">
+            <div>
+              <h2>Lifetime</h2>
+              <div class="muted">Lifetime and year-to-date totals from saved monthly metrics.</div>
+            </div>
+            <button class="small" type="button" onclick="exportEarningsCSV()">Export Earnings CSV</button>
+          </div>
+        </div>
+
+        <div class="card metric span-3">
+          <div>
+            <div class="label">YTD gross</div>
+            <div id="earn-ytd-gross" class="value">$0</div>
+          </div>
+          <div class="note">Current year</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">YTD net</div>
+            <div id="earn-ytd-net" class="value">$0</div>
+          </div>
+          <div class="note">Gross minus tax reserve</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Lifetime gross</div>
+            <div id="earn-life-gross" class="value">$0</div>
+          </div>
+          <div class="note">All entered metrics</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Lifetime net</div>
+            <div id="earn-life-net" class="value">$0</div>
+          </div>
+          <div class="note">Gross minus tax reserve</div>
+        </div>
+
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Lifetime ebook sales</div>
+            <div id="earn-life-ebook-sales" class="value">0</div>
+          </div>
+          <div class="note">Paid ebook units</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Lifetime KU pages</div>
+            <div id="earn-life-ku-pages" class="value">0</div>
+          </div>
+          <div class="note">KENP pages read</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Lifetime KU reads</div>
+            <div id="earn-life-ku-reads" class="value">0</div>
+          </div>
+          <div class="note">Full-read estimate</div>
+        </div>
+        <div class="card metric span-3">
+          <div>
+            <div class="label">Lifetime actions</div>
+            <div id="earn-life-actions" class="value">0</div>
+          </div>
+          <div class="note">Sales + KU reads + print</div>
+        </div>
+
+        <div class="card span-8 chart-card">
+          <h2>Monthly gross trend</h2>
+          <canvas id="earningsTrendChart" height="180"></canvas>
+          <div class="footer-note">Shows gross royalty estimate by month from your saved metrics.</div>
+        </div>
+
+        <div class="card span-4">
+          <h2>Snapshot</h2>
+          <div class="table-wrap">
+            <table>
+              <tbody>
+                <tr><td class="muted">Best month</td><td id="earn-best-month" style="text-align:right">—</td></tr>
+                <tr><td class="muted">Best month gross</td><td id="earn-best-month-gross" style="text-align:right">$0</td></tr>
+                <tr><td class="muted">Avg gross / active month</td><td id="earn-avg-month" style="text-align:right">$0</td></tr>
+                <tr><td class="muted">Lifetime print sales</td><td id="earn-life-print-sales" style="text-align:right">0</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="footer-note">“Active month” means a month with at least one saved metric entry.</div>
+        </div>
+
+        <div class="card span-12">
+          <h2>By Year</h2>
+          <div class="table-wrap"><table id="earnings-year-table"></table></div>
+        </div>
+
+        <div class="card span-12">
+          <h2>Lifetime by Book</h2>
+          <div class="table-wrap"><table id="earnings-book-table"></table></div>
+        </div>
+      </div>
+    </section>
+
     <section id="trends" class="views">
       <div class="dashboard-grid grid">
         <div class="card span-12">
@@ -1008,7 +1141,7 @@
           <div class="row between">
             <div>
               <h2>Marketing / Ads</h2>
-              <div class="muted">Track campaign spend and how it impacts sales, KU pages, and reader actions.</div>
+              <div class="muted">Track campaign spend, sales/KU lift, and optionally create matching expense records.</div>
             </div>
             <button class="small primary" type="button" data-action="add-campaign">+ Campaign</button>
           </div>
@@ -1328,6 +1461,7 @@ function render(){
   renderMoney();
   renderReceipts();
   renderMetrics();
+  renderEarnings();
   renderTrends();
   renderMarketing();
   renderBackup();
@@ -1865,6 +1999,120 @@ function drawBarCompare(canvas, actual, goal){
     ctx.fillStyle = c.text; ctx.textAlign="left"; ctx.font = "bold 14px system-ui"; ctx.fillText(num(b.val), padL+8, y+barH/2+5);
   });
 }
+
+function earningsSummary(){
+  const taxPct = Number((state.settings && state.settings.taxReservePct) || 0) / 100;
+  const yearNow = new Date().getFullYear().toString();
+  const monthly = {};
+  const yearly = {};
+  const byBook = {};
+  let total = {gross:0, net:0, ebookSales:0, kuPages:0, kuReads:0, printSales:0, actions:0};
+  let ytd = {gross:0, net:0, ebookSales:0, kuPages:0, kuReads:0, printSales:0, actions:0};
+
+  (state.metrics || []).forEach(m=>{
+    const c = calcMetric(m);
+    const key = (m.month || "").slice(0,7) || "Unknown";
+    const year = key.slice(0,4);
+    const btitle = titleById(m.bookId) || "Unknown Book";
+    const row = {
+      gross:c.gross,
+      net:c.gross * (1 - taxPct),
+      ebookSales:Number(m.ebookSales||0),
+      kuPages:Number(m.kuPages||0),
+      kuReads:c.kuReads,
+      printSales:Number(m.printSales||0),
+      actions:c.actions
+    };
+
+    ["gross","net","ebookSales","kuPages","kuReads","printSales","actions"].forEach(k=>{
+      total[k] += row[k];
+      if(year === yearNow) ytd[k] += row[k];
+    });
+
+    if(!monthly[key]) monthly[key] = {month:key,gross:0,net:0,ebookSales:0,kuPages:0,kuReads:0,printSales:0,actions:0};
+    if(!yearly[year]) yearly[year] = {year:year,gross:0,net:0,ebookSales:0,kuPages:0,kuReads:0,printSales:0,actions:0};
+    if(!byBook[btitle]) byBook[btitle] = {book:btitle,gross:0,net:0,ebookSales:0,kuPages:0,kuReads:0,printSales:0,actions:0};
+
+    [monthly[key], yearly[year], byBook[btitle]].forEach(target=>{
+      ["gross","net","ebookSales","kuPages","kuReads","printSales","actions"].forEach(k=>target[k]+=row[k]);
+    });
+  });
+
+  const months = Object.values(monthly).sort((a,b)=>String(a.month).localeCompare(String(b.month)));
+  const years = Object.values(yearly).sort((a,b)=>String(b.year).localeCompare(String(a.year)));
+  const books = Object.values(byBook).sort((a,b)=>b.gross-a.gross);
+  const bestMonth = months.slice().sort((a,b)=>b.gross-a.gross)[0] || null;
+  const avgGross = months.length ? total.gross / months.length : 0;
+  return {total,ytd,months,years,books,bestMonth,avgGross};
+}
+function renderEarnings(){
+  const root = document.getElementById("earnings");
+  if(!root) return;
+  const s = earningsSummary();
+  const setText = (id, txt) => { const el = document.getElementById(id); if(el) el.textContent = txt; };
+
+  setText("earn-ytd-gross", money(s.ytd.gross));
+  setText("earn-ytd-net", money(s.ytd.net));
+  setText("earn-life-gross", money(s.total.gross));
+  setText("earn-life-net", money(s.total.net));
+  setText("earn-life-ebook-sales", num(s.total.ebookSales));
+  setText("earn-life-ku-pages", num(s.total.kuPages));
+  setText("earn-life-ku-reads", num(s.total.kuReads));
+  setText("earn-life-actions", num(s.total.actions));
+  setText("earn-life-print-sales", num(s.total.printSales));
+  setText("earn-best-month", s.bestMonth ? monthLabel(s.bestMonth.month) : "—");
+  setText("earn-best-month-gross", money(s.bestMonth ? s.bestMonth.gross : 0));
+  setText("earn-avg-month", money(s.avgGross));
+
+  const canvas = document.getElementById("earningsTrendChart");
+  if(canvas){
+    drawLineChart(canvas, s.months.slice(-12).map(m=>monthLabel(m.month)), s.months.slice(-12).map(m=>m.gross), "$");
+  }
+
+  const yearRows = s.years.map(y=>`<tr>
+    <td>${escapeHTML(y.year)}</td>
+    <td>${money2(y.gross)}</td>
+    <td>${money2(y.net)}</td>
+    <td>${num(y.ebookSales)}</td>
+    <td>${num(y.kuPages)}</td>
+    <td>${num(y.kuReads)}</td>
+    <td>${num(y.printSales)}</td>
+    <td>${num(y.actions)}</td>
+  </tr>`).join("");
+  const yearTable = document.getElementById("earnings-year-table");
+  if(yearTable){
+    yearTable.innerHTML = `<thead><tr><th>Year</th><th>Gross</th><th>Net est.</th><th>Ebook</th><th>KU Pages</th><th>KU Reads</th><th>Print</th><th>Actions</th></tr></thead><tbody>${yearRows || '<tr><td colspan="8" class="muted">No earnings metrics yet.</td></tr>'}</tbody>`;
+  }
+
+  const bookRows = s.books.map(b=>`<tr>
+    <td>${escapeHTML(b.book)}</td>
+    <td>${money2(b.gross)}</td>
+    <td>${money2(b.net)}</td>
+    <td>${num(b.ebookSales)}</td>
+    <td>${num(b.kuPages)}</td>
+    <td>${num(b.kuReads)}</td>
+    <td>${num(b.printSales)}</td>
+    <td>${num(b.actions)}</td>
+  </tr>`).join("");
+  const bookTable = document.getElementById("earnings-book-table");
+  if(bookTable){
+    bookTable.innerHTML = `<thead><tr><th>Book</th><th>Gross</th><th>Net est.</th><th>Ebook</th><th>KU Pages</th><th>KU Reads</th><th>Print</th><th>Actions</th></tr></thead><tbody>${bookRows || '<tr><td colspan="8" class="muted">No book earnings yet.</td></tr>'}</tbody>`;
+  }
+}
+function exportEarningsCSV(){
+  const s = earningsSummary();
+  const headers = ["Scope","Name","Gross","Net Estimate","Ebook Sales","KU Pages","KU Reads","Print Sales","Reader Actions"];
+  const rows = [];
+  rows.push({"Scope":"Lifetime","Name":"All Books","Gross":s.total.gross.toFixed(2),"Net Estimate":s.total.net.toFixed(2),"Ebook Sales":s.total.ebookSales,"KU Pages":s.total.kuPages,"KU Reads":s.total.kuReads.toFixed(2),"Print Sales":s.total.printSales,"Reader Actions":s.total.actions.toFixed(2)});
+  rows.push({"Scope":"YTD","Name":String(new Date().getFullYear()),"Gross":s.ytd.gross.toFixed(2),"Net Estimate":s.ytd.net.toFixed(2),"Ebook Sales":s.ytd.ebookSales,"KU Pages":s.ytd.kuPages,"KU Reads":s.ytd.kuReads.toFixed(2),"Print Sales":s.ytd.printSales,"Reader Actions":s.ytd.actions.toFixed(2)});
+  s.years.forEach(y=>rows.push({"Scope":"Year","Name":y.year,"Gross":y.gross.toFixed(2),"Net Estimate":y.net.toFixed(2),"Ebook Sales":y.ebookSales,"KU Pages":y.kuPages,"KU Reads":y.kuReads.toFixed(2),"Print Sales":y.printSales,"Reader Actions":y.actions.toFixed(2)}));
+  s.books.forEach(b=>rows.push({"Scope":"Book","Name":b.book,"Gross":b.gross.toFixed(2),"Net Estimate":b.net.toFixed(2),"Ebook Sales":b.ebookSales,"KU Pages":b.kuPages,"KU Reads":b.kuReads.toFixed(2),"Print Sales":b.printSales,"Reader Actions":b.actions.toFixed(2)}));
+  const csv = toCSV(headers, rows);
+  const blob = new Blob([csv], {type:"text/csv"});
+  downloadBlob(blob, "Author_Command_Center_Earnings_Lifetime.csv");
+}
+
+
 function renderTrends(){
   const trendsEl = document.getElementById("trends");
   if(!trendsEl) return;
@@ -2027,7 +2275,7 @@ function renderMarketing(){
             <span class="pill">Spend ${money2(im.spend)}</span>
             <span class="pill green">Gross ${money2(im.gross)}</span>
             <span class="pill ${im.net>=0?'green':'red'}">Net ${money2(im.net)}</span>
-            <span class="pill gold">ROAS ${im.roas.toFixed(1)}x</span>
+            <span class="pill gold">ROAS ${im.roas.toFixed(1)}x</span>${best.expenseId ? `<span class="pill green">Expense linked</span>` : ``}
           </div>
         </div>
         <div class="actions"><button class="small" data-action="edit-campaign" data-id="${best.id}">Edit</button></div>
@@ -2051,13 +2299,14 @@ function renderMarketing(){
       <td>${money2(im.gross)}</td>
       <td class="${im.net>=0?'good':'bad'}">${money2(im.net)}</td>
       <td>${im.roas.toFixed(1)}x</td>
+      <td>${c.expenseId ? `<button class="small" data-action="edit-expense" data-id="${c.expenseId}">Expense</button>` : '<span class="pill red">No</span>'}</td>
       <td><button class="small" data-action="edit-campaign" data-id="${c.id}">Edit</button></td>
       <td><button class="small danger" data-action="delete-campaign" data-id="${c.id}">Delete</button></td>
     </tr>`;
   }).join("");
   const table = document.getElementById("marketing-table");
   if(table){
-    table.innerHTML = `<thead><tr><th>Campaign</th><th>Platform</th><th>Book</th><th>Dates</th><th>Spend</th><th>Sales</th><th>KU Pages</th><th>Actions</th><th>Gross</th><th>Net</th><th>ROAS</th><th></th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="13" class="muted">No campaigns yet. Add ads, newsletter swaps, promos, or social pushes here.</td></tr>'}</tbody>`;
+    table.innerHTML = `<thead><tr><th>Campaign</th><th>Platform</th><th>Book</th><th>Dates</th><th>Spend</th><th>Sales</th><th>KU Pages</th><th>Actions</th><th>Gross</th><th>Net</th><th>ROAS</th><th>Expense</th><th></th><th></th></tr></thead><tbody>${rows || '<tr><td colspan="14" class="muted">No campaigns yet. Add ads, newsletter swaps, promos, or social pushes here.</td></tr>'}</tbody>`;
   }
 }
 function campaignForm(c={}){
@@ -2078,38 +2327,93 @@ function campaignForm(c={}){
       <div><label>Start date</label><input type="date" name="startDate" value="${attr(c.startDate || todayISO())}"></div>
       <div><label>End date</label><input type="date" name="endDate" value="${attr(c.endDate || "")}"></div>
       <div><label>Spend $</label><input type="number" step="0.01" name="spend" value="${c.spend??0}" inputmode="decimal"></div>
+      <div><label>Expense category</label><select name="expenseCategory">
+        ${["Ads","Newsletter","Website","Other"].map(x=>`<option ${((c.expenseCategory||"Ads")===x)?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div><label>Business use %</label><input type="number" step="1" name="expenseBusinessPct" value="${c.expenseBusinessPct??100}" inputmode="numeric"></div>
+      <div><label>Payment method</label><select name="expensePayment">
+        ${["Card","Debit","Credit","PayPal","Bank","Cash","Other"].map(x=>`<option ${((c.expensePayment||"Card")===x)?'selected':''}>${x}</option>`).join("")}
+      </select></div>
+      <div class="full">
+        <label style="display:flex;align-items:center;gap:8px;color:var(--text);font-size:13px">
+          <input type="checkbox" name="createExpense" ${(c.expenseId || c.createExpense !== false) ? 'checked' : ''} style="width:18px;height:18px;accent-color:var(--accent)">
+          Create/update matching expense for this spend
+        </label>
+        <div class="footer-note">This prevents duplicate entry: campaign spend can also appear in Expenses for tax/receipt tracking.</div>
+      </div>
       <div><label>Attributed ebook sales</label><input type="number" name="ebookSales" value="${c.ebookSales??0}" inputmode="numeric"></div>
       <div><label>KU page lift</label><input type="number" name="kuPageLift" value="${c.kuPageLift??0}" inputmode="numeric"></div>
       <div><label>Attributed print sales</label><input type="number" name="printSales" value="${c.printSales??0}" inputmode="numeric"></div>
       <div><label>Attributed gross return $</label><input type="number" step="0.01" name="grossReturn" value="${c.grossReturn??0}" inputmode="decimal"></div>
       <div class="full"><label>Notes</label><textarea name="notes" placeholder="Targeting, keywords, promo source, what changed, observed KU lift...">${escapeHTML(c.notes||"")}</textarea></div>
     </div>
-    <div class="footer-note">Tip: enter the lift you can reasonably attribute to the campaign. For KU, use page-read lift compared with your normal baseline.</div>
+    <div class="footer-note">Tip: enter the lift you can reasonably attribute to the campaign. If spend is linked to Expenses, attach the receipt later from the Expense/Receipts tabs.</div>
     <div class="form-actions"><button type="button" data-action="close-modal">Cancel</button><button class="primary" type="submit">Save Campaign</button></div>
   </form>`;
 }
+
+function syncCampaignExpense(c){
+  if(!Array.isArray(state.expenses)) state.expenses = [];
+  const spend = Number(c.spend || 0);
+  if(spend <= 0) return c.expenseId || "";
+  const existingId = c.expenseId || "";
+  const existing = existingId ? state.expenses.find(e => e.id === existingId) : null;
+  const start = c.startDate || todayISO();
+  const year = Number((start || todayISO()).slice(0,4)) || new Date().getFullYear();
+  const vendor = c.platform || c.name || "Marketing Campaign";
+  const bookTitle = titleById(c.bookId);
+  const expense = {
+    id: existing ? existing.id : uid("E"),
+    date: start,
+    vendor: vendor,
+    category: c.expenseCategory || "Ads",
+    amount: spend,
+    businessPct: Number(c.expenseBusinessPct || 100),
+    payment: c.expensePayment || "Card",
+    taxYear: year,
+    receiptName: existing ? (existing.receiptName || "") : "",
+    receiptData: existing ? (existing.receiptData || "") : "",
+    receiptType: existing ? (existing.receiptType || "") : "",
+    notes: `Linked marketing campaign: ${c.name || "Untitled Campaign"}${bookTitle ? " / " + bookTitle : ""}. ${c.notes || ""}`.trim(),
+    linkedCampaignId: c.id
+  };
+  upsert("expenses", expense);
+  return expense.id;
+}
+
+
 function saveCampaign(e){
   e.preventDefault();
   const f = new FormData(e.target);
+  const existingCampaign = editingId ? (state.marketing||[]).find(c => c.id === editingId) : null;
   const obj = {
     id: editingId || uid("C"),
     name:f.get("name"), platform:f.get("platform"), type:f.get("type"), bookId:f.get("bookId"),
     status:f.get("status"), startDate:f.get("startDate"), endDate:f.get("endDate"),
     spend:Number(f.get("spend")), ebookSales:Number(f.get("ebookSales")),
     kuPageLift:Number(f.get("kuPageLift")), printSales:Number(f.get("printSales")),
-    grossReturn:Number(f.get("grossReturn")), notes:f.get("notes"), updatedAt:new Date().toISOString()
+    grossReturn:Number(f.get("grossReturn")), notes:f.get("notes"), updatedAt:new Date().toISOString(),
+    expenseId: existingCampaign ? (existingCampaign.expenseId || "") : "",
+    expenseCategory:f.get("expenseCategory") || "Ads",
+    expenseBusinessPct:Number(f.get("expenseBusinessPct") || 100),
+    expensePayment:f.get("expensePayment") || "Card",
+    createExpense:f.get("createExpense")==="on"
   };
+  if(obj.createExpense && obj.spend > 0){
+    obj.expenseId = syncCampaignExpense(obj);
+  }
   if(!Array.isArray(state.marketing)) state.marketing = [];
-  upsert("marketing", obj); closeModal(); saveState(); render(); showToast("Campaign saved.");
+  upsert("marketing", obj); closeModal(); saveState(); render(); showToast(obj.expenseId ? "Campaign + expense saved." : "Campaign saved.");
 }
 function exportMarketingCSV(){
-  const headers = ["Campaign","Platform","Type","Book","Status","Start Date","End Date","Spend","Attributed Ebook Sales","KU Page Lift","Attributed Print Sales","Reader Actions","Gross Return","Net After Spend","ROAS","Notes"];
+  const headers = ["Campaign","Platform","Type","Book","Status","Start Date","End Date","Spend","Expense Linked","Expense ID","Expense Category","Business Use %","Attributed Ebook Sales","KU Page Lift","Attributed Print Sales","Reader Actions","Gross Return","Net After Spend","ROAS","Notes"];
   const rows = (state.marketing||[]).map(c=>{
     const im = campaignImpact(c);
     return {
       "Campaign":c.name||"", "Platform":c.platform||"", "Type":c.type||"", "Book":titleById(c.bookId)||"All",
       "Status":c.status||"", "Start Date":c.startDate||"", "End Date":c.endDate||"",
-      "Spend":im.spend.toFixed(2), "Attributed Ebook Sales":im.ebookSales, "KU Page Lift":im.kuPages,
+      "Spend":im.spend.toFixed(2), "Expense Linked":c.expenseId ? "Yes" : "No", "Expense ID":c.expenseId || "", "Expense Category":c.expenseCategory || "Ads", "Business Use %":c.expenseBusinessPct || 100,
+      "Attributed Ebook Sales":im.ebookSales, "KU Page Lift":im.kuPages,
       "Attributed Print Sales":im.printSales, "Reader Actions":im.actions.toFixed(2),
       "Gross Return":im.gross.toFixed(2), "Net After Spend":im.net.toFixed(2), "ROAS":im.roas.toFixed(2),
       "Notes":c.notes||""
@@ -2457,6 +2761,7 @@ function buildCSVFiles(){
     return {
       "Campaign ID":c.id,"Campaign":c.name,"Platform":c.platform,"Type":c.type,"Book":titleById(c.bookId)||"All",
       "Status":c.status,"Start Date":c.startDate,"End Date":c.endDate,"Spend":im.spend.toFixed(2),
+      "Expense Linked":c.expenseId ? "Yes" : "No","Expense ID":c.expenseId || "","Expense Category":c.expenseCategory || "Ads","Business Use %":c.expenseBusinessPct || 100,
       "Attributed Ebook Sales":im.ebookSales,"KU Page Lift":im.kuPages,"Attributed Print Sales":im.printSales,
       "Reader Actions":im.actions.toFixed(2),"Gross Return":im.gross.toFixed(2),
       "Net After Spend":im.net.toFixed(2),"ROAS":im.roas.toFixed(2),"Notes":c.notes
